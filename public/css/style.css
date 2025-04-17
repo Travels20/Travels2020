@@ -1,0 +1,35 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f9f9f9;
+    padding: 40px;
+}
+
+.container {
+    background: white;
+    padding: 20px;
+    max-width: 800px;
+    margin: auto;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #ccc;
+}
+
+input, textarea {
+    width: 50%;
+    padding: 10px;
+    margin-top: 4px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+button {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+.success {
+    color: green;
+    margin-bottom: 15px;
+}
