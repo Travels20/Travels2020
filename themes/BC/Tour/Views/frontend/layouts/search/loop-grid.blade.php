@@ -1,6 +1,7 @@
 @php
     $translation = $row->translate();
 @endphp
+
 <div class="item-tour item-loop-wrap {{$wrap_class ?? ''}}">
     @if($row->is_featured == "1")
         <div class="featured">
@@ -70,25 +71,32 @@
         </span>
     </div>
     @endif -->
-    <div class="d-flex flex-wrap align-items-center px-3">
+    <div class="d-flex flex-wrap align-items-center px-3 item-title">
+    <a @if(!empty($blank)) target="_blank" @endif href="{{$row->getDetailUrl($include_param ?? true)}}">
         <!-- Display Hotel -->
+         <!-- Hotel & Google Rating Row -->
+    <div class="d-flex align-items-center flex-wrap mb-2">
         @if(!empty($row->hotel))
-            <div class="d-flex align-items-center pr-2">
+            <div class="d-flex align-items-center mr-3">
                 {{ $row->hotel }} <i class="fa fa-star text-warning ml-1"></i> Hotel
             </div>
         @endif
 
-        <!-- Display Google Rating -->
-        <div class="d-flex align-items-center pr-2">
-            <i class="fa fa-google p-1"></i> 4.5
+        <div class="d-flex align-items-center  mr-3">
+            <i class="fa fa-google mr-1 text-black"></i> 4.5
         </div>
-
+        <div class="d-flex align-items-center">
+            <i class="fa fa-car mr-1 text-black"></i> Transfers
+        </div>
+    </div>
+       
         <!-- Display Stay -->
         @if(!empty($row->stay))
             <div class="d-flex align-items-center pr-2">
                 <i class="icofont-beach p-2"></i> {{ $row->stay }}
             </div>
         @endif
+    </a>
     </div>
 
      <div class=" d-flex justify-content-start px-3 ">
@@ -133,7 +141,7 @@
         <!-- Button Section (Right) -->
         <div class="d-flex align-items-center">
             <a @if(!empty($blank)) target="_blank" @endif href="{{ $row->getDetailUrl($include_param ?? true) }}">
-                <button type="button" class="btn btn-success btn-sm">View Details</button>
+                <button type="button" class="btn btn-success btn-sm">Book now</button>
             </a>
         </div>
     </div>

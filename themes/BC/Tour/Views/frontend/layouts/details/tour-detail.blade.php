@@ -67,7 +67,7 @@
                         <i class="icofont-travelling"></i>
                     </div>
                     <div class="info">
-                        <h4 class="name">{{__("Group Size")}}</h4>
+                        <h4 class="name">{{__("No of Pax")}}</h4>
                         <p class="value">
                             @if($row->max_people > 1)
                                 {{ __(":number persons",array('number'=>$row->max_people)) }}

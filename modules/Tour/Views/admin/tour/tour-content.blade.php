@@ -139,7 +139,7 @@
         </div>
         
         <div class="form-group-item">
-             <label class="control-label">{{__('More Content')}}</label>
+             <label class="control-label">{{__('Activities')}}</label>
                 <div class="g-items-header">
                     <div class="row">
                         <div class="col-md-5">{{__("Content")}}</div>

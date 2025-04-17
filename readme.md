@@ -25,9 +25,3 @@ Booking Core is a Booking System based on Laravel, designed for a travel website
 5. Flutterwave Payment
 
 6. Razorpay
-
-### Get Support: [Click here](https://bookingcore.co)
-
-### Join our Discord: [https://discord.gg/FBP3TuFXCe](https://discord.gg/FBP3TuFX)
-
-### Author: [BookingCore Team](https://codecanyon.net/user/bookingcore)

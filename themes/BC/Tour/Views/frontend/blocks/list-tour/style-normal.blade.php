@@ -11,16 +11,16 @@
     @endif
     <div class="list-item">
         @if($style_list === "normal")
-            <div class="row">
+            <div class="row  row-eq-height">
                 @foreach($rows as $row)
-                    <div class="col-lg-{{$col ?? 3}} col-md-6">
+                    <div class="col-lg-{{$col ?? 4}} col-md-6 col-item">
                         @include('Tour::frontend.layouts.search.loop-grid')
                     </div>
                 @endforeach
             </div>
         @endif
         @if($style_list === "carousel")
-            <div class="owl-carousel">
+            <div class="owl-carousel ">
                 @foreach($rows as $row)
                     @include('Tour::frontend.layouts.search.loop-grid')
                 @endforeach
