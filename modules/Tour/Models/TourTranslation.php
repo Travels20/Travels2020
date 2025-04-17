@@ -15,6 +15,8 @@ class TourTranslation extends BaseModel
         'activities',
         'stay',
         'hotel',
+        'meal_plan',
+        'transfers',
         'shortdesc',
         'include',
         'exclude',

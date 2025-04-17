@@ -3,7 +3,10 @@
     <div class="panel-body">
         <div class="form-group magic-field" data-id="title" data-type="title">
             <label class="control-label">{{__("Title")}}</label>
-            <input type="text" value="{{old('title',$translation->title)}}" placeholder="{{__("Title")}}" name="title" class="form-control">
+            <input type="text" value="{{old('title',$translation->title)}}" placeholder="{{__("Title")}}" name="title" class="form-control" maxlength="30">
+            <small class="form-text text-muted">
+                 {{ __("Maximum 30 characters only.") }}
+             </small>
         </div>
         <div class="form-group magic-field" data-id="content" data-type="content">
             <label class="control-label">{{__("Content")}}</label>
@@ -186,17 +189,73 @@
 
         <div class="form-group magic-field" data-id="stay" data-type="stay">
             <label class="control-label">{{__("Stay ")}}</label>
-            <input type="text" value="{{$translation->stay}}" placeholder="{{__("stay")}}" name="stay" class="form-control">
+            <input type="text" value="{{$translation->stay}}" placeholder="{{__("stay")}}" name="stay" class="form-control" maxlength="80">
+            <small class="form-text text-muted">
+                 {{ __("Maximum 80 characters only.") }}
+             </small>
         </div>
 
-        <div class="form-group magic-field" data-id="hotel" data-type="hotel">
+        <!-- <div class="form-group magic-field" data-id="hotel" data-type="hotel">
             <label class="control-label">{{__("Hotel Ratting")}}</label>
-            <input type="number" value="{{$translation->hotel}}" placeholder="{{__("hotel")}}" name="hotel" class="form-control">
+            <input type="number" value="{{$translation->hotel}}" placeholder="{{__("hotel")}}" name="hotel" class="form-control" >
+           
+        </div> -->
+    
+
+        <div class="form-group magic-field" data-id="hotel" data-type="hotel">
+            <label class="control-label">{{ __("Hotel Rating") }}</label>
+            <select name="hotel" class="form-control">
+                <option value="2" {{ $translation->hotel == '2' ? 'selected' : '' }}>2 ★ Star</option>
+                <option value="3" {{ $translation->hotel == '3' ? 'selected' : '' }}>3 ★ Star</option>
+                <option value="4" {{ $translation->hotel == '4' ? 'selected' : '' }}>4 ★ Star</option>
+                <option value="5" {{ $translation->hotel == '5' ? 'selected' : '' }}>5 ★ Star</option>
+            </select>
         </div>
-        <div class="form-group magic-field" data-id="shortdesc" data-type="shortdesc">
+
+        <div class="form-group magic-field" data-id="meal_plan" data-type="meal_plan">
+            <label class="control-label">{{ __("Meal Plan") }}</label>
+            <select name="meal_plan" class="form-control">
+                <option value="Breakfast" {{ $translation->meal_plan == 'Breakfast' ? 'selected' : '' }}>
+                    {{ __("Breakfast") }}
+                </option>
+                <option value="Full Board" {{ $translation->meal_plan == 'Full Board' ? 'selected' : '' }}>
+                    {{ __("Full Board") }}
+                </option>
+                <option value="Breakfast + Dinner" {{ $translation->meal_plan == 'Breakfast + Dinner' ? 'selected' : '' }}>
+                    {{ __("Breakfast + Dinner") }}
+                </option>
+                <option value="All Included" {{ $translation->meal_plan == 'All Included' ? 'selected' : '' }}>
+                    {{ __("All Included") }}
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group magic-field" data-id="transfers" data-type="transfers">
+            <label class="control-label">{{ __("Transfer Type") }}</label>
+            <select name="transfers" class="form-control">
+                <option value="PVT" {{ $translation->transfers == 'PVT' ? 'selected' : '' }}>
+                    {{ __("PVT - Private Transfer") }}
+                </option>
+                <option value="SIC" {{ $translation->transfers == 'SIC' ? 'selected' : '' }}>
+                    {{ __("SIC - Seat In Coach") }}
+                </option>
+                <option value="Speedboat" {{ $translation->transfers == 'Speedboat' ? 'selected' : '' }}>
+                    {{ __("Speedboat") }}
+                </option>
+                <option value="Seaplane" {{ $translation->transfers == 'Seaplane' ? 'selected' : '' }}>
+                    {{ __("Seaplane") }}
+                </option>
+                <option value="Domestic Flight" {{ $translation->transfers == 'Domestic Flight' ? 'selected' : '' }}>
+                    {{ __("Domestic Flight") }}
+                </option>
+            </select>
+        </div>
+
+
+        <!-- <div class="form-group magic-field" data-id="shortdesc" data-type="shortdesc">
             <label class="control-label">{{__(" Short Inclusion")}}</label>
             <input type="text" value="{{$translation->shortdesc}}" placeholder="{{__("Short Inclusion")}}" name="inclusion" class="form-control">
-        </div>
+        </div> -->
 
 
 

@@ -63,6 +63,8 @@ class Tour extends Bookable
         'activities',
         'stay',
         'hotel',
+        'meal_plan',
+        'transfers',
         'shortdesc',
         'status',
         'include',

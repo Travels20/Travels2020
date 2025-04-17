@@ -71,61 +71,123 @@
         </span>
     </div>
     @endif -->
-    <div class="d-flex flex-wrap align-items-center px-3 item-title">
-    <a @if(!empty($blank)) target="_blank" @endif href="{{$row->getDetailUrl($include_param ?? true)}}">
-        <!-- Display Hotel -->
-         <!-- Hotel & Google Rating Row -->
-    <div class="d-flex align-items-center flex-wrap mb-2">
-        @if(!empty($row->hotel))
-            <div class="d-flex align-items-center mr-3">
-                {{ $row->hotel }} <i class="fa fa-star text-warning ml-1"></i> Hotel
-            </div>
-        @endif
+    <div class="d-flex flex-wrap align-items-center px-1 item-title">
+        <a @if(!empty($blank)) target="_blank" @endif href="{{$row->getDetailUrl($include_param ?? true)}}">
+        
+            <!-- <div class="d-flex align-items-center flex-wrap">
 
-        <div class="d-flex align-items-center  mr-3">
-            <i class="fa fa-google mr-1 text-black"></i> 4.5
-        </div>
-        <div class="d-flex align-items-center">
-            <i class="fa fa-car mr-1 text-black"></i> Transfers
-        </div>
-    </div>
-       
-        <!-- Display Stay -->
-        @if(!empty($row->stay))
-            <div class="d-flex align-items-center pr-2">
-                <i class="icofont-beach p-2"></i> {{ $row->stay }}
-            </div>
-        @endif
-    </a>
-    </div>
-
-     <div class=" d-flex justify-content-start px-3 ">
-       <!-- Display Activities -->
-        @if(!empty($row->activities))
-            @php
-                // Check if $row->activities is a string, if so decode it
-                $activities = is_string($row->activities) ? json_decode($row->activities, true) : $row->activities;
-            @endphp
-                @foreach($activities as $activity)
-                    <div class="p-2 mb-2 bg-light text-dark rounded-pill ">
-                        <i class="fa fa-check text-success"></i> {{ $activity['title'] }}
+                @if(!empty($row->hotel))
+                    <div class="d-flex align-items-center flex-wrap mr-3">
+                        <span class="mr-1">{{ $row->hotel }}</span>
+                        <i class="fa fa-star text-warning mr-1"></i>
+                        <span>Hotel</span>
                     </div>
-                @endforeach
-          
-        @endif
-    </div>
-   
+                @endif
+               
+                @if(!empty($row->meal_plan))
+                    <div class="d-flex align-items-center flex-wrap mr-3">
+                        <i class="fa fa-cutlery mr-2 text-success"></i> {{ $row->meal_plan }}
+                    </div>
+                @endif
 
+                <hr>
+               
+                @if(!empty($row->activities))
+                    @php
+                        $activities = is_string($row->activities) ? json_decode($row->activities, true) : $row->activities;
+                    @endphp
+                        @foreach($activities as $activity)
+                            <div class="p-2 mb-2 bg-light text-dark rounded-pill ">
+                                <i class="fa fa-check text-success"></i> {{ $activity['title'] }}
+                            </div>
+                        @endforeach
+                @endif
+                @if(!empty($row->transfers))
+                    <div class="d-flex align-items-center flex-wrap mr-3">
+                        <i class="fa fa-car mr-2 text-info"></i> {{ $row->transfers }}
+                    </div>
+                @endif
+            </div> -->
+            <div class="d-flex flex-column flex-wrap">
+
+                {{-- First Row: Hotel (left) + Meal Plan (right) --}}
+                <div class="d-flex justify-content-between flex-wrap mb-2">
+                    @if(!empty($row->hotel))
+                        <div class="d-flex align-items-center">
+                            <span class="mr-1">{{ $row->hotel }}</span>
+                            <i class="fa fa-star text-warning mr-1"></i>
+                            <span>Hotel</span>
+                        </div>
+                    @endif
+
+                    @if(!empty($row->meal_plan))
+                        <div class="d-flex align-items-center">
+                            <i class="fa fa-cutlery mr-2 text-success"></i> {{ $row->meal_plan }}
+                        </div>
+                    @endif
+                </div>
+                <div class="vr"></div>
+                {{-- Second Row: Activities (left) + Transfers (right) --}}
+                <div class="d-flex justify-content-between flex-wrap">
+                    <div class="d-flex flex-column">
+                        @if(!empty($row->activities))
+                            @php
+                                $activities = is_string($row->activities) ? json_decode($row->activities, true) : $row->activities;
+                            @endphp
+                            @foreach($activities as $activity)
+                                <div class="bg-light text-dark rounded-pill">
+                                    <i class="fa fa-check text-success"></i> {{ $activity['title'] }}
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+
+                    @if(!empty($row->transfers))
+                        <div class="d-flex align-items-start">
+                            <i class="fa fa-car mr-2 text-info"></i> {{ $row->transfers }}
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+                <hr>
+            <!-- Display Stay -->
+            @if(!empty($row->stay))
+                <div class="d-flex align-items-center">
+                    <i class="icofont-beach p-1"></i> {{ $row->stay }}
+                </div>
+            @endif
+
+             <!-- <div class="d-flex align-items-center mr-3">
+                    <i class="fa fa-google mr-2 text-black"></i> 4.5
+                </div> -->
+                
+            <!-- <div class="d-flex justify-content-start ">
+              
+                @if(!empty($row->activities))
+                    @php
+                        $activities = is_string($row->activities) ? json_decode($row->activities, true) : $row->activities;
+                    @endphp
+                        @foreach($activities as $activity)
+                            <div class="p-2 mb-2 bg-light text-dark rounded-pill ">
+                                <i class="fa fa-check text-success"></i> {{ $activity['title'] }}
+                            </div>
+                        @endforeach
+                @endif
+                
+            </div> -->
+           
+        </a>
+    </div>
+
+    
     <!-- </div> -->
     <!-- <div class="item-title"> -->
         @if(!empty($row->shortdesc))
             <div class="item-title">{{$row->shortdesc}}</div>
         @endif
     <!-- </div> -->
-   
-    <!-- <div class="location">
-        <p>INCLUDES: Accomodation, Speed boat Transfer, Green Tax, 24x7 online support</p>
-    </div> -->
+ 
     <hr>
     <div class="d-flex justify-content-between align-items-center flex-wrap px-3">
         <!-- Price Section (Left) -->
