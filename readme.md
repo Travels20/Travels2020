@@ -12,22 +12,4 @@ Booking Core is a Booking System based on Laravel, designed for a travel website
 7. Multi currency
 8. Mobile App
 
-## Payment Gateways:
 
-1. Paypal Express
-
-2. Stripe Checkout
-
-3. Two Checkout
-
-4. Paypal Pro
-
-5. Flutterwave Payment
-
-6. Razorpay
-
-### Get Support: [Click here](https://bookingcore.co)
-
-### Join our Discord: [https://discord.gg/FBP3TuFXCe](https://discord.gg/FBP3TuFX)
-
-### Author: [BookingCore Team](https://codecanyon.net/user/bookingcore)
