@@ -1,5 +1,3 @@
-## About Booking Core Version 3.0.0
-Booking Core is a Booking System based on Laravel, designed for a travel website, Marketplace, Travel Agency, Tour Operator, Room Bnb, Villa Rental, Resort Rental, Make Travel website. With 6+ years working on travel products we confident to bring to you best product for your travel site with optimized UX/UI, friendly on mobile on the search engine.
 
 ## Main Features:
 
@@ -12,8 +10,8 @@ Booking Core is a Booking System based on Laravel, designed for a travel website
 7. Multi currency
 8. Mobile App
 
-## Payment Gateways:
 
+<<<<<<< HEAD
 1. Paypal Express
 
 2. Stripe Checkout
@@ -25,3 +23,5 @@ Booking Core is a Booking System based on Laravel, designed for a travel website
 5. Flutterwave Payment
 
 6. Razorpay
+=======
+>>>>>>> a326e1703237024425f594012fc5fbb77cae681a
