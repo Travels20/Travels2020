@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\OTPController;
 use Modules\Booking\Controllers\BookingController;
 use App\Http\Controllers\ItineraryController;
+use App\Http\Controllers\ItineraryPdfController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -49,8 +50,20 @@ Route::get('/get/passengerDetails/{code}/{id}', [BookingController::class, 'getP
 Route::post('/booking/store', [BookingController::class, 'store'])->name('booking.store');
 
 //itinerary
-Route::get('/itinerary', [ItineraryController::class, 'index']);
-Route::post('/itinerary', [ItineraryController::class, 'store'])->name('itinerary.store');
+Route::get('/adminItinerary', [ItineraryController::class, 'admin']);
+// Route::get('/itinerary', [ItineraryController::class, 'index']);
+Route::get('/itineraryform', [ItineraryController::class, 'form']);
+Route::get('/itinerary/create', [ItineraryController::class, 'create'])->name('itinerary.create');
+Route::get('/itinerary/itineraryform', [ItineraryController::class, 'itineraryform'])->name('itinerary.itineraryform');
+// Route::post('/itinerary', [ItineraryController::class, 'store'])->name('itinerary.store');
+Route::post('/itinerary/store', [ItineraryController::class, 'store'])->name('itinerary.store');
+// Route::post('/itinerary/store', [ItineraryController::class, 'store']);
+
+Route::get('/customers/create', [CustomerController::class, 'create'])->name('customers.create');
+
+Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
+
+Route::get('/singlepdf-itinerary/{id}', [ItineraryPdfController::class, 'singlepdf']);
 
 
 
