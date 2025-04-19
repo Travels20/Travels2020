@@ -4,21 +4,20 @@
     <div class="card w-100 w-md-75 mx-auto">
         <div class="card-body">
             <h5 class="card-title text-center">Tour Booking Form</h5>
-            <form method="POST" action="{{ route('itinerary.store') }}" enctype="multipart/form-data">
-                @csrf
+            <form action="{{ route('itinerary.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf 
                 <div class="row">
-                    <!-- Hidden Input for ID -->
-                    <input type="hidden" class="form-control" id="id" name="id">
-                    <!-- <input type="hidden" class="form-control" disabled id="id" name="id"> -->
-
-                    <!-- Trip ID -->
-                    <!-- <div class="col-12 col-md-6 mb-3">
-                        <label for="tripId" class="form-label">Trip ID</label>
-                        <input type="text" class="form-control" disabled id="tripId" name="tripId" placeholder="Enter Trip ID">
-                    </div> -->
+                  
+                    <!-- Trip ID (display-only) -->
                     <div class="col-12 col-md-6 mb-3">
-                    <input type="hidden" name="tripId" value="">
+                        <label for="tripIdDisplay" class="form-label">Trip ID</label>
+                        <input type="text" class="form-control" id="tripIdDisplay" value="{{ $generatedTripId }}" disabled>
                     </div>
+
+                    <!-- Hidden input to submit -->
+                    <input type="hidden" name="tripId" id="tripId" value="{{ $generatedTripId }}">
+
+                                    
 
                     <!-- User Name -->
                     <div class="col-12 col-md-6 mb-3">
@@ -139,27 +138,7 @@
                 <h5 class="text-center">Vacation Summary</h5>
 
                 <div id="daysContainer">
-                    <!-- <div class="day-form border rounded p-3 mb-3" id="day1">
-                        <h6 class="mb-3">Day 1</h6>
-                        <div class="row">
-                            <div class="col-12 col-md-6 mb-3">
-                                <input type="text" class="form-control" name="stay[]" placeholder="Enter Stay">
-                            </div>
-
-                            <div class="col-12 col-md-6 mb-3">
-                                <input type="date" class="form-control" name="date[]">
-                            </div>
-
-                            <div class="col-12 col-md-6 mb-3">
-                                <label class="form-label">Day 1 Image</label>
-                                <input type="file" class="form-control" name="images[]" accept="image/*">
-                            </div>
-
-                            <div class="col-12 col-md-6 mb-3">
-                                <textarea class="form-control" name="itinerary[]" placeholder="Enter itinerary details" style="height: 100px" required></textarea>
-                            </div>
-                        </div>
-                    </div> -->
+                   
                 </div>
 
                 <div class="mt-3">
@@ -173,12 +152,6 @@
                         <label class="form-check-label" for="multiplePdf">Multiple PDF</label>
                     </div>
                 </div>
-
-                <!-- <div class="text-center mt-4">
-                    <a href="/adminItinerary" class="btn btn-secondary">Back</a>
-                    <button type="submit" class="btn btn-primary" id="submitButton">Save</button>
-                    <button type="button" class="btn btn-primary" id="updateButton">Update</button>
-                </div> -->
                 <div class="text-center mt-4">
                     <div class="d-inline-block">
                         <a href="/adminItinerary" class="btn btn-secondary">Back</a>

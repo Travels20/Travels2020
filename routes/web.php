@@ -7,6 +7,9 @@ use App\Http\Controllers\Auth\OTPController;
 use Modules\Booking\Controllers\BookingController;
 use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\ItineraryPdfController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\CustomerController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -51,19 +54,27 @@ Route::post('/booking/store', [BookingController::class, 'store'])->name('bookin
 
 //itinerary
 Route::get('/adminItinerary', [ItineraryController::class, 'admin']);
-// Route::get('/itinerary', [ItineraryController::class, 'index']);
-Route::get('/itineraryform', [ItineraryController::class, 'form']);
-Route::get('/itinerary/create', [ItineraryController::class, 'create'])->name('itinerary.create');
+// Route::get('/itineraryform', [ItineraryController::class, 'form']);
+// Route::get('/itinerary/create', [ItineraryController::class, 'create'])->name('itinerary.create');
 Route::get('/itinerary/itineraryform', [ItineraryController::class, 'itineraryform'])->name('itinerary.itineraryform');
-// Route::post('/itinerary', [ItineraryController::class, 'store'])->name('itinerary.store');
 Route::post('/itinerary/store', [ItineraryController::class, 'store'])->name('itinerary.store');
-// Route::post('/itinerary/store', [ItineraryController::class, 'store']);
-
-Route::get('/customers/create', [CustomerController::class, 'create'])->name('customers.create');
-
-Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
 
 Route::get('/singlepdf-itinerary/{id}', [ItineraryPdfController::class, 'singlepdf']);
+
+//customers
+Route::get('/customers/customerform', [CustomerController::class, 'customerform'])->name('customers.customerform');
+Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+
+
+//invoices
+Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+Route::get('/invoicepdf/{id}', [InvoiceController::class, 'generatePDF'])->name('invoices.generatePDF');
+Route::get('/invoices/invoiceForm', [InvoiceController::class, 'invoiceForm'])->name('invoice.invoiceForm');
+Route::get('/invoices/list', [InvoiceController::class, 'listInvoices'])->name('invoices.list');
+Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+
+
+
 
 
 

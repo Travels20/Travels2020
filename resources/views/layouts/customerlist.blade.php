@@ -31,7 +31,7 @@
                     </button>
                 </a>
 
-                <a href="{{ route('customers.create') }}">
+                <a href="{{ route('customers.customerform') }}">
                     <button class="btn btn-primary fw-bold">
                         Add New
                     </button>
@@ -82,7 +82,7 @@
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
     <!-- Your custom JS -->
-    <script src="{{ asset('customerDetails/js/listcustomer.js') }}"></script>
+    <!-- <script src="{{ asset('customerDetails/js/listcustomer.js') }}"></script> -->
 
 </body>
 </html>

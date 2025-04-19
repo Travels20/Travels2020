@@ -19,7 +19,7 @@
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="mb-0">Invoice List</h2>
-            <a href="{{ route('invoices.create') }}">
+            <a href="{{ route('invoice.invoiceForm') }}">
                 <button class="btn btn-primary fw-bold">Add New</button>
             </a>
         </div>
@@ -40,28 +40,9 @@
                     </tr>
                 </thead>
                 <tbody id="invoiceTableBody">
-                    {{-- Example Blade loop if using Laravel backend:
-                    @foreach ($invoices as $invoice)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $invoice->invoice_no }}</td>
-                            <td>{{ $invoice->username }}</td>
-                            <td>{{ $invoice->tour_name }}</td>
-                            <td>{{ $invoice->check_in }}</td>
-                            <td>{{ $invoice->check_out }}</td>
-                            <td>{{ $invoice->adults }}</td>
-                            <td>{{ $invoice->children }}</td>
-                            <td>
-                                <a href="{{ route('invoices.edit', $invoice->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <form action="{{ route('invoices.destroy', $invoice->id) }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach --}}
+   
                 </tbody>
+
             </table>
         </div>
     </div>

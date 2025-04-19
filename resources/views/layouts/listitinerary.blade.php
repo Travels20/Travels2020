@@ -41,21 +41,7 @@
                     </tr>
                 </thead>
                 <tbody id="itineraryTableBody">
-                    {{-- You can loop through passed data if using backend rendering --}}
-                    {{-- @foreach ($itineraries as $itinerary)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $itinerary->trip_id }}</td>
-                            <td>{{ $itinerary->user->name }}</td>
-                            <td>{{ $itinerary->tour_name }}</td>
-                            <td>{{ $itinerary->check_in }}</td>
-                            <td>{{ $itinerary->check_out }}</td>
-                            <td colspan="2">{{ $itinerary->passenger_count }}</td>
-                            <td>
-                                <!-- Action buttons -->
-                            </td>
-                        </tr>
-                    @endforeach --}}
+                  
                 </tbody>
             </table>
         </div>
@@ -69,7 +55,7 @@
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
     <!-- Your custom JS -->
-    <script src="{{ asset('js/listitinerary.js') }}"></script>
+    <!-- <script src="{{ asset('js/listitinerary.js') }}"></script> -->
 
 </body>
 </html>
