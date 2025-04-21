@@ -54,12 +54,24 @@ Route::post('/booking/store', [BookingController::class, 'store'])->name('bookin
 
 //itinerary
 Route::get('/adminItinerary', [ItineraryController::class, 'admin']);
-// Route::get('/itineraryform', [ItineraryController::class, 'form']);
-// Route::get('/itinerary/create', [ItineraryController::class, 'create'])->name('itinerary.create');
 Route::get('/itinerary/itineraryform', [ItineraryController::class, 'itineraryform'])->name('itinerary.itineraryform');
 Route::post('/itinerary/store', [ItineraryController::class, 'store'])->name('itinerary.store');
+Route::get('/singlepdf-itinerary/{id}', [ItineraryController::class, 'singlepdf'])->name('itineary.singlepdf');
+Route::get('/multiplepdf-itinerary/{id}', [ItineraryController::class, 'multiplepdf'])->name('itineary.multiplepdf');
+Route::get('/listitineray', [ItineraryController::class, 'listitineray']);
+Route::post('/itinerary/delete', [ItineraryController::class, 'delete']);
+Route::get('/itineraryform/{id}', [ItineraryController::class, 'edit']);
 
-Route::get('/singlepdf-itinerary/{id}', [ItineraryPdfController::class, 'singlepdf']);
+// Route::get('/itinerary/itineraryform/{id}', [ItineraryController::class, 'itineraryform'])->name('itinerary.itineraryform');
+
+
+
+
+// Route to update trip (form submission)
+Route::post('/itinerary/{id}', [ItineraryController::class, 'update']);
+
+
+
 
 //customers
 Route::get('/customers/customerform', [CustomerController::class, 'customerform'])->name('customers.customerform');
@@ -68,10 +80,9 @@ Route::post('/customers', [CustomerController::class, 'store'])->name('customers
 
 //invoices
 Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
-Route::get('/invoicepdf/{id}', [InvoiceController::class, 'generatePDF'])->name('invoices.generatePDF');
+Route::get('/invoicepdf/{id}', [InvoiceController::class, 'generatePDF'])->name('invoice.invoicepaf');
 Route::get('/invoices/invoiceForm', [InvoiceController::class, 'invoiceForm'])->name('invoice.invoiceForm');
 Route::get('/invoices/list', [InvoiceController::class, 'listInvoices'])->name('invoices.list');
-Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
 
 
 

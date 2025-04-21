@@ -1,61 +1,100 @@
 document.addEventListener("DOMContentLoaded", function () {
-    fetch("{{ route('invoices.list') }}") // Fetch invoices using AJAX
+    fetch("{{ route('invoices.list') }}")
         .then(response => response.json())
         .then(invoices => {
-            let tableBody = document.getElementById("invoiceTableBody");
-            let table = $('#invoicelistTable'); // Select the table
+            const tableBody = document.getElementById("invoiceTableBody");
+            const table = $('#invoicelistTable');
+
+            // Destroy existing DataTable instance if any
+            if ($.fn.DataTable.isDataTable('#invoicelistTable')) {
+                table.DataTable().clear().destroy();
+            }
 
             tableBody.innerHTML = ""; // Clear previous content
 
             invoices.forEach((invoice, index) => {
-                let row = document.createElement("tr");
+                const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${index + 1}</td> 
-                    <td>${invoice.invoice_no}</td> 
-                    <td>${invoice.username}</td>
-                    <td>${invoice.tour_name}</td>
-                    <td>${invoice.check_in}</td>
-                    <td>${invoice.check_out}</td>
-                    <td>${invoice.adults}</td>
-                    <td>${invoice.children}</td>
+                    <td>${invoice.invoice_no || ''}</td> 
+                    <td>${invoice.username || ''}</td>
+                    <td>${invoice.tour_name || ''}</td>
+                    <td>${invoice.check_in || ''}</td>
+                    <td>${invoice.check_out || ''}</td>
+                    <td>${invoice.adults || 0}</td>
+                    <td>${invoice.children || 0}</td>
                     <td>
-                        <a href='/invoices/edit/${invoice.id}' title="view">
+                        <a href="/invoices/edit/${invoice.id}" title="View">
                             <button class="btn btn-info btn-sm"><i class="fas fa-eye"></i></button>
                         </a>
-                        <button class="btn btn-danger btn-sm" onclick="deleteInvoice(${invoice.id})"><i class="fas fa-trash-alt"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteInvoice(${invoice.id})">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </td>
                 `;
                 tableBody.appendChild(row);
             });
 
-            // Initialize DataTable after content is added
+            // Re-initialize DataTable
             table.DataTable();
         })
         .catch(error => {
-            console.error("Error fetching data:", error);
+            console.error("Error fetching invoice data:", error);
         });
 });
 
-// Delete function for invoices
-function deleteInvoice(invoiceId) {
-    if (confirm("Are you sure you want to delete this invoice?")) {
-        fetch(`/invoices/${invoiceId}`, {
-            method: "DELETE",
-            headers: {
-                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                window.location.reload(); // Reload page to reflect changes
-            } else {
-                alert("Error: " + data.message);
-            }
-        })
-        .catch(error => {
-            console.error("Error deleting invoice:", error);
-        });
+// Toggle destination input visibility
+function toggleDestination(selectElement) {
+    let destinationInput = document.getElementById("destinationOthers");
+    if (selectElement.value === "Others") {
+        destinationInput.classList.remove("d-none");
+        destinationInput.required = true;
+    } else {
+        destinationInput.classList.add("d-none");
+        destinationInput.required = false;
+        destinationInput.value = "";
     }
 }
+
+$(document).ready(function () {
+    $('#InvoiceBtn').click(function () {
+        let isValid = true;
+
+        // Validate required fields
+        $('#invoiceForm [required]').each(function () {
+            if (!$(this).val()) {
+                isValid = false;
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        if (!isValid) {
+            alert('Please fill all required fields.');
+            return;
+        }
+
+        // Serialize form data
+        let formData = $('#invoiceForm').serialize();
+
+        $.ajax({
+            url: "{{ route('invoices.store') }}",
+            method: "POST",
+            data: formData,
+            success: function (response) {
+                if (response.invoice_id) {
+                    alert('Invoice saved!');
+                    let redirectUrl = `/invoicepdf/${response.invoice_id}`;
+                    window.open(redirectUrl, '_blank');
+                } else {
+                    alert('Unexpected error.');
+                }
+            },
+            error: function (xhr) {
+                console.error(xhr);
+                alert('Error: could not save');
+            }
+        });
+    });
+});

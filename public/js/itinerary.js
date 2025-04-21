@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Event listener for check-in and check-out date changes
     const checkInInput = document.getElementById("checkIn");
     const checkOutInput = document.getElementById("checkOut");
+    const editors = [];
 
     // Function to calculate days between check-in and check-out
     function calculateDays() {
@@ -29,6 +30,8 @@ document.addEventListener("DOMContentLoaded", function () {
             startDate.setDate(startDate.getDate() + 1);
         }
 
+
+
         // Generate and add day forms
         $daysbetween.forEach((date, index) => {
             let dayCount = index + 1;
@@ -41,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <!-- Stay -->
                     <div class="col-12 col-md-6 mb-3">
                         <div class="form-floating">
-                            <input type="text" class="form-control" name="stay[]" placeholder="Enter Stay" required>
+                            <input type="text" class="form-control" name="stay[]" placeholder="Enter Stay">
                             <label>Stay</label>
                         </div>
                     </div>
@@ -49,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <!-- Date -->
                     <div class="col-12 col-md-6 mb-3">
                         <div class="form-floating">
-                            <input type="date" class="form-control" name="date[]" value="${date}" required>
+                            <input type="date" class="form-control" name="date[]" value="${date}">
                             <label>Date</label>
                         </div>
                     </div>
@@ -57,13 +60,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     <!-- Image Upload -->
                     <div class="col-12 col-md-6 mb-3">
                         <label class="form-label">Day ${dayCount} Image (Max: 300px width, 200px height)</label>
-                        <input type="file" class="form-control image-upload" name="images[]" accept="image/*" required>
+                        <input type="file" class="form-control image-upload" name="images[]" accept="image/*">
                     </div>
 
                     <!-- Itinerary Content -->
                     <div class="col-12 col-md-6 mb-3">
                         <div class="form-floating">
-                            <textarea class="form-control itinerary-editor" name="itinerary[]" placeholder="Enter itinerary details" style="height: 100px" required></textarea>
+                            <textarea class="form-control itinerary-editor" name="itinerary-content[]" placeholder="Enter itinerary details" style="height: 100px"></textarea>
                         </div>
                     </div>
                 </div>
@@ -71,11 +74,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
             daysContainer.appendChild(newDay);
 
-            // Initialize CKEditor for each dynamically created textarea
+            // Initialize CKEditor for the newly added textarea
             ClassicEditor.create(newDay.querySelector('.itinerary-editor'))
+                .then(editor => {
+                    editors[index] = editor;
+                })
                 .catch(error => {
-                    console.error("Error initializing CKEditor:", error);
+                    console.error("CKEditor Init Error:", error);
                 });
+
+
         });
     }
 
@@ -90,64 +98,78 @@ document.addEventListener("DOMContentLoaded", function () {
     // Form submission logic
     const submitButton = document.getElementById("submitButton");
 
-    submitButton.addEventListener("click", function () {
+    submitButton.addEventListener("click", function (e) {
+        e.preventDefault();
         handleSubmit(submitButton);
     });
 
     function handleSubmit(button) {
         button.innerHTML = `
-            <div class="spinner-border text-light" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        `;
+        <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    `;
 
         const formData = new FormData();
         const errorMessages = [];
 
         const dayForms = document.querySelectorAll("#daysContainer .day-form");
-        const pdfType = document.querySelector("input[name='pdfType']:checked").value;
+        const pdfType = document.querySelector("input[name='pdfType']:checked")?.value || "Single Pdf";
 
-        // Collect vacation_summary (daily itinerary) data
+
+
+        // Collect vacation_summary
         dayForms.forEach((day, i) => {
+
             const stay = day.querySelector("input[name='stay[]']").value.trim();
             const date = day.querySelector("input[name='date[]']").value.trim();
-            const itinerary = day.querySelector("textarea[name='itinerary[]']").value.trim();
+            // const itinerary = day.querySelector("textarea[name='itinerary_content[]']").value.trim();
+            const itinerary = editors[i]?.getData().trim() || '';
             const vsImage = day.querySelector("input[name='images[]']").files[0];
 
-            formData.append(`stay[]`, stay);
-            formData.append(`date[]`, date);
-            formData.append(`itinerary[]`, itinerary);
+            formData.append("stay[]", stay);
+            formData.append("date[]", date);
+            formData.append("itinerary_content[]", itinerary);
             if (vsImage) {
-                formData.append(`images[]`, vsImage);
+                formData.append("images[]", vsImage);
             }
         });
 
-        // Basic trip fields
-        const fields = ["userName", "tourName", "checkIn", "checkOut", "numAdults", "numChildren"];
+        // Required fields
+        const fields = ["userName", "tourName", "checkIn", "checkOut", "numAdults", "officerName"];
         for (let field of fields) {
             const input = document.getElementById(field);
             if (!input || !input.value.trim()) {
                 errorMessages.push(`Please fill in the ${field}.`);
-                break;
+            } else {
+                formData.append(field, input.value.trim());
             }
-            formData.append(field, input.value.trim());
         }
 
-        const tripIdInput = document.getElementById("tripId"); // hidden input
+        // Optional fields
+        const optionalFields = ["numChildren"];
+        optionalFields.forEach(field => {
+            const input = document.getElementById(field);
+            if (input && input.value.trim()) {
+                formData.append(field, input.value.trim());
+            }
+        });
+
+        const tripIdInput = document.getElementById("tripId");
         if (tripIdInput && tripIdInput.value.trim()) {
             formData.append("tripId", tripIdInput.value.trim());
         }
-        
 
-        // Upload tour/flight images
-        const tourImage = document.getElementById("timages").files[0];
-        const flightImage = document.getElementById("flightimages").files[0];
-        const officerImage = document.getElementById("officerimage").files[0];
-        if (tourImage) formData.append("timages", tourImage);
-        if (flightImage) formData.append("flightimages", flightImage);
+        // Uploads
+        const tourImage = document.getElementById("timages").files[0] || null;
+        const flightImage = document.getElementById("flightimage").files[0] || null;
+        const officerImage = document.getElementById("officerimage").files[0] || null;
+    
+        if (tourImage) formData.append("tourImage", tourImage);
+        if (flightImage) formData.append("flightimage", flightImage);
         if (officerImage) formData.append("officerimage", officerImage);
 
-        // Editor data
+        // CKEditor fields
         formData.append("inclusion", inclusionvalue.getData());
         formData.append("exclusion", exclusionvalue.getData());
         formData.append("notes", notevalue.getData());
@@ -155,41 +177,58 @@ document.addEventListener("DOMContentLoaded", function () {
         formData.append("hotel", hotelvalue.getData());
         formData.append("flight", flightvalue.getData());
 
-        if (errorMessages.length) {
+        if (errorMessages.length > 0) {
             alert(errorMessages.join("\n"));
             button.innerHTML = "Save";
             return;
         }
 
-        // Submit form data using FormData (multipart form submission)
         fetch("/itinerary/store", {
             method: "POST",
             headers: {
-                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
             },
-            body: formData  // Send the FormData directly, no JSON
+            body: formData
         })
-        .then(res => res.json())
-        .then(data => {
-            console.log('Server response:', data);
-            if (data && data.id) {
-                const tourId = data.id;
-                const redirectUrl = pdfType === 'Single Pdf'
-                    ? `/singlepdf-itinerary/${tourId}`
-                    : `/generatepdf.php?id=${tourId}`;
-
-                window.location.href = redirectUrl;
-            } else {
-                alert("Error processing request.");
+            .then(response => response.json())
+            .then(data => {
+                console.log("Server response:", data);
+        
+                if (data && data.status === "success" && data.id) {
+                    const tourId = data.id;
+                    let pdfUrl = "";
+        
+                    if (pdfType === "Single Pdf") {
+                        pdfUrl = `/singlepdf-itinerary/${tourId}`;
+                    } else if (pdfType === "Multiple Pdf") {
+                        pdfUrl = `/multiplepdf-itinerary/${tourId}`;
+                    }
+        
+                    // Open PDF in new tab if URL is set
+                    if (pdfUrl !== "") {
+                        window.open(pdfUrl, "_blank");
+                    } else {
+                        alert("Saved successfully! No PDF type selected.");
+                    }
+        
+                    // After opening PDF, redirect to admin itinerary page
+                    setTimeout(() => {
+                        window.location.href = "/adminItinerary";
+                    }, 3000); // wait 1 second before redirecting
+                } else {
+                    alert("Error: Unable to save itinerary.");
+                }
+        
                 button.innerHTML = "Save";
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            alert("An error occurred while submitting.");
-            button.innerHTML = "Save";
-        });
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("An error occurred while submitting.");
+                button.innerHTML = "Save";
+            });
+        
     }
+
 
     // Initialize CKEditor for other fields dynamically
     var hotelvalue, flightvalue, inclusionvalue, exclusionvalue, notevalue, costvalue;
@@ -201,7 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 .then(editor => {
                     callback(editor);
                     editor.model.document.on('change:data', () => {
-                        console.log(`${selector} content changed:`, editor.getData());
+                        // console.log(`${selector} content changed:`, editor.getData());
                     });
                 })
                 .catch(error => console.error(`Error initializing ${selector}:`, error));
@@ -243,7 +282,189 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// Add Day Function - Corrected to use ClassicEditor instead of CKEditor
+
+function editTour(tripId) {
+    fetch(`/itineraryform/${tripId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const trip = data.trip;
+                const vacationSummary = data.vacation_summary;
+                const daysContainer = document.getElementById("daysContainer");
+
+                // Clear previous content
+                daysContainer.innerHTML = "";
+
+                // Populate general tour details
+                document.getElementById("id").value = trip.id;
+                document.getElementById("tripId").value = trip.trip_id;
+                document.getElementById("userName").value = trip.username;
+                document.getElementById("tourName").value = trip.tour_name;
+                document.getElementById("checkIn").value = trip.check_in;
+                document.getElementById("checkOut").value = trip.check_out;
+                document.getElementById("numAdults").value = trip.adults;
+                document.getElementById("numChildren").value = trip.children;
+
+                // Set CKEditor contents
+                inclusionvalue.setData(trip.inclusion || '');
+                exclusionvalue.setData(trip.exclusion || '');
+                notevalue.setData(trip.notes || '');
+                costvalue.setData(trip.cost || '');
+                hotelvalue.setData(trip.hotel || '');
+                flightvalue.setData(trip.flight || '');
+
+                // Image previews (use Laravel's public storage path)
+                if (trip.tour_image) {
+                    document.getElementById("tourImagePreview").src = `/storage/${trip.tour_image}`;
+                }
+
+                if (trip.ftimage) {
+                    document.getElementById("tourImagePreviewflight").src = `/storage/${trip.ftimage}`;
+                }
+
+                // Add vacation summary days
+                if (Array.isArray(vacationSummary)) {
+                    vacationSummary.forEach((day, index) => {
+                        addDay(
+                            day.stay,
+                            day.date,
+                            day.image ? `/storage/${day.image}` : "",
+                            day.itinerary_content,
+                            index + 1
+                        );
+                    });
+                }
+            } else {
+                alert("Error fetching trip data: " + (data.message || "Unknown error."));
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching trip details:", error);
+            alert("Failed to load trip details.");
+        });
+}
+
+
+// Update Trip Function
+$("#updateButton").on("click", function () {
+    let daysContainer = document.getElementById("daysContainer");
+    let dayForms = daysContainer.getElementsByClassName("update-day-form");
+    let errorMessages = [];
+    let formData = new FormData();
+
+   
+    let pdfType = document.querySelector("input[name='pdfType']:checked").value;
+
+    for (let i = 0; i < dayForms.length; i++) {
+        let dayForm = dayForms[i];
+        let stay = dayForm.querySelector("input[name='stay[]']").value.trim();
+        let date = dayForm.querySelector("input[name='date[]']").value.trim();
+         let itineraryTextarea = dayForm.querySelector("textarea[name='itinerary[]']");
+         let itineraryId = itineraryTextarea.id;
+     
+         // Use CKEditor content if available, fallback to textarea value
+         let itinerary = (typeof CKEDITOR !== "undefined" && CKEDITOR.instances[itineraryId])
+             ? CKEDITOR.instances[itineraryId].getData().trim()
+             : itineraryTextarea.value.trim();
+
+        let vsImageInput = dayForm.querySelector("input[name='images[]']");
+        let vsImages = vsImageInput.files.length > 0 ? vsImageInput.files[0] : null;
+
+        if (!stay || !date || !itinerary) {
+            errorMessages.push(`Please fill all fields for Day ${i + 1}`);
+        } else {
+            formData.append(`days[${i}][stay]`, stay);
+            formData.append(`days[${i}][date]`, date);
+            formData.append(`days[${i}][itinerary]`, itinerary);
+            if (vsImages) {
+                formData.append(`days[${i}][vsImages]`, vsImages);
+            }
+        }
+    }
+
+    let id = document.getElementById("id").value.trim();
+    let tripId = document.getElementById("tripId").value.trim();
+    let userName = document.getElementById("userName").value.trim();
+    let tourName = document.getElementById("tourName").value.trim();
+    let checkIn = document.getElementById("checkIn").value.trim();
+    let checkOut = document.getElementById("checkOut").value.trim();
+    let numAdults = document.getElementById("numAdults").value.trim();
+    let numChildren = document.getElementById("numChildren").value.trim();
+    let inclusion = inclusionvalue.getData();
+    let exclusion = exclusionvalue.getData();
+    let notes = notevalue.getData();
+    let cost = costvalue.getData();
+
+    let hotel = hotelvalue.getData();
+    let flight = flightvalue.getData();
+    let tourImages = document.getElementById("timages").files[0] || null;
+    let flightImages = document.getElementById("flightimages").files[0] || null;
+
+    if (tourImages) formData.append("tourImages", tourImages);
+    if (flightImages) formData.append("flightimages", flightImages);
+
+    if (!tripId || !tourName || !checkIn || !checkOut || !numAdults || !numChildren) {
+        errorMessages.push("Please fill in all required trip details.");
+    }
+
+    if (errorMessages.length > 0) {
+        button.innerHTML = `Save`;
+        alert(errorMessages.join("\n"));
+        return;
+    }
+
+    // Append general form data
+    formData.append("tripId", tripId);
+    formData.append("userName", userName);
+    formData.append("tourName", tourName);
+    formData.append("checkIn", checkIn);
+    formData.append("checkOut", checkOut);
+    formData.append("numAdults", numAdults);
+    formData.append("numChildren", numChildren);
+    formData.append("inclusion", inclusion);
+    formData.append("exclusion", exclusion);
+    formData.append("notes", notes);
+    formData.append("cost", cost);
+    formData.append("hotel", hotel);
+    formData.append("flight", flight);
+
+    fetch(`/itinerary/${id}`, {
+        method: "POST",
+        headers: {
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (pdfType === 'Single Pdf') {
+                window.open(`/singlepdf-itinerary/${id}`, "_blank");
+            } else if (pdfType === 'Multiple Pdf') {
+                window.open(`/multiplepdf-itinerary/${id}`, "_blank");
+            } else {
+                alert("Data updated successfully!");
+            }
+
+            setTimeout(() => {
+                window.location.href = "/adminitinerary";
+            }, 1000);
+        } else {
+            alert("Error updating itinerary: " + data.message);
+        }
+    })
+    .catch(error => {
+        console.error("Error updating trip:", error);
+        alert("An unexpected error occurred.");
+    });
+});
+
+// Add Day Function - 
 function addDay(stay, date, image, itinerary, dayCount) {
     let newDay = document.createElement("div");
     newDay.classList.add("day-container", "update-day-form");
@@ -292,56 +513,10 @@ function addDay(stay, date, image, itinerary, dayCount) {
         .catch(error => console.error("Error initializing CKEditor:", error));
 }
 
-function toggleDestination(selectElement) {
-    let destinationInput = document.getElementById("destinationOthers");
-    if (selectElement.value === "Others") {
-        destinationInput.classList.remove("d-none");
-        destinationInput.required = true;
-    } else {
-        destinationInput.classList.add("d-none");
-        destinationInput.required = false;
-        destinationInput.value = "";
-    }
-}
 
-$(document).ready(function () {
-    $('#InvoiceBtn').click(function () {
-        let isValid = true;
-        
-        // Validate required fields
-        $('#invoiceForm [required]').each(function () {
-            if (!$(this).val()) {
-                isValid = false;
-                $(this).addClass('is-invalid');
-            } else {
-                $(this).removeClass('is-invalid');
-            }
-        });
 
-        if (!isValid) {
-            alert('Please fill all required fields.');
-            return;
-        }
 
-        // Serialize form data
-        let formData = $('#invoiceForm').serialize();
 
-        $.ajax({
-            url: "{{ route('invoices.store') }}",
-            method: "POST",
-            data: formData,
-            success: function (response) {
-                if (response.invoice_id) {
-                    alert('Invoice saved!');
-                    // Trigger PDF generation and download
-                    window.location.href = "/invoicepdf/" + response.invoice_id;  // Redirect to the PDF download route
-                } else {
-                    alert('Unexpected error.');
-                }
-            },
-            error: function (xhr) {
-                alert('Error: could not save');
-            }
-        });
-    });
-});
+
+
+

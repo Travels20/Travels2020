@@ -4,24 +4,28 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+
+
 class tour_booking extends Model
 {
+    protected $table = 'tour_booking';
+
     protected $fillable = [
-        'tripId',         
-        'userName',
-        'tourName',
-        'checkIn',
-        'checkOut',
-        'numAdults',
-        'numChildren',
+        'trip_id',         
+        'username',
+        'tour_name',
+        'check_in',
+        'check_out',
+        'adults',
+        'children',
         'inclusion',
         'exclusion',
         'notes',
         'cost',
         'hotel',
         'flight',
-        'timages',
-        'flightimages',
+        'map_image',
+        'flightimage',
         'officerimage',
         'officerName',
         

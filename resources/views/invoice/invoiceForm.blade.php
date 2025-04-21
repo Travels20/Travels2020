@@ -3,7 +3,7 @@
         <div class="card w-100 w-md-75 mx-auto">
             <div class="card-body">
                 <h5 class="card-title text-center">Customer Details</h5>
-                <form id="invoiceForm" action="{{ route('invoices.store') }}" method="POST">
+                <form id="invoiceForm" >
                     @csrf
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -90,4 +90,4 @@
                 </form>
             </div>
         </div>
-    </div>
+ </div>

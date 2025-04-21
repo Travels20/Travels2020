@@ -6,15 +6,18 @@ use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Mpdf\Mpdf;
-use Carbon\Carbon;
+use Carbon\Carbon; // ✅ Add this, since you're using Carbon
+use Exception;
 
 class InvoiceController extends Controller
 {
+    // Show the invoice creation form
     public function invoiceForm()
     {
-        return view('invoice.invoiceForm'); 
+        return view('invoice.invoiceForm');
     }
 
+    // Store the invoice data
     public function store(Request $request)
     {
         // ✅ Validate all required fields
@@ -22,8 +25,8 @@ class InvoiceController extends Controller
             'customer_name' => 'required|string|max:255',
             'customer_address' => 'required|string|max:255',
             'customer_gst_no' => 'nullable|string|max:50',
-            'travelFrom' => 'required|date|before_or_equal:travelTo', // Ensure travelFrom is before or equal to travelTo
-            'travelTo' => 'required|date|after_or_equal:travelFrom', // Ensure travelTo is after or equal to travelFrom
+            'travelFrom' => 'required|date|before_or_equal:travelTo',
+            'travelTo' => 'required|date|after_or_equal:travelFrom',
             'destination' => 'required|string',
             'destinationOthers' => 'nullable|string',
             'numAdults' => 'required|integer|min:1',
@@ -36,17 +39,17 @@ class InvoiceController extends Controller
             'office_gst_no' => 'nullable|string|max:50',
             'office_pan_no' => 'nullable|string|max:50',
         ]);
-    
+
         // ✅ Handle 'Others' option for destination
         $destination = $validated['destination'] === 'Others'
-            ? $request->input('destinationOthers')
+            ? $validated['destinationOthers']
             : $validated['destination'];
-    
+
         // ✅ Create Invoice
         $invoice = Invoice::create([
             'customer_name' => $validated['customer_name'],
             'customer_address' => $validated['customer_address'],
-            'customer_gst_no' => $validated['customer_gst_no'] ?? null,  // Ensure null for optional fields
+            'customer_gst_no' => $validated['customer_gst_no'] ?? null,
             'travel_from' => $validated['travelFrom'],
             'travel_to' => $validated['travelTo'],
             'destination' => $destination,
@@ -56,46 +59,40 @@ class InvoiceController extends Controller
             'child_cost' => $validated['child_cost'],
             'service_cost' => $validated['service_cost'],
             'service_gst' => $validated['service_gst'],
-            'notes' => $validated['notes'] ?? null,  // Ensure null for optional fields
+            'notes' => $validated['notes'] ?? null,
             'office_gst_no' => $validated['office_gst_no'] ?? null,
             'office_pan_no' => $validated['office_pan_no'] ?? null,
         ]);
-    
-        // ✅ Return JSON response with invoice ID
+
         return response()->json(['invoice_id' => $invoice->id]);
     }
 
+    // Generate the invoice PDF
     public function generatePDF($id)
     {
         try {
-            // Fetch the invoice from the database
             $invoice = Invoice::find($id);
-    
-            // Check if the invoice exists
+
             if (!$invoice) {
                 return response('Invoice not found', 404);
             }
-    
-            // Calculate duration and nights
+
             $checkIn = Carbon::parse($invoice->travel_from);
             $checkOut = Carbon::parse($invoice->travel_to);
-            $duration = $checkIn->diffInDays($checkOut) + 1; // Total duration
-            $nights = $duration - 1; // Nights is 1 less than duration
-    
-            // Calculate total costs
+            $duration = $checkIn->diffInDays($checkOut) + 1;
+            $nights = $duration - 1;
+
             $adultsTotalCost = $invoice->adults_cost * $invoice->num_adults;
             $childTotalCost = $invoice->child_cost * $invoice->num_children;
             $serviceCost = $invoice->service_cost;
             $gstRate = $invoice->service_gst;
             $gstAmount = ($serviceCost * $gstRate) / 100;
             $totalAmount = $adultsTotalCost + $childTotalCost + $serviceCost + $gstAmount;
-    
-            // Prepare header and footer images (ensure these files exist in public/images)
+
             $header = '<img src="' . public_path('images/Header.jpg') . '" width="100%">';
             $footer = '<img src="' . public_path('images/Footer.jpg') . '" width="100%" style="margin-top:20px;">';
-    
-            // Configure mPDF
-            $mpdf = new \Mpdf\Mpdf([
+
+            $mpdf = new Mpdf([
                 'mode' => 'utf-8',
                 'format' => 'A4',
                 'margin_top' => 10,
@@ -103,12 +100,10 @@ class InvoiceController extends Controller
                 'margin_left' => 15,
                 'margin_right' => 15,
             ]);
-    
-            // Set header and footer
+
             $mpdf->SetHTMLHeader($header);
             $mpdf->SetHTMLFooter($footer);
-    
-            // Generate HTML content using the Blade view
+
             $html = view('pdf.invoice', compact(
                 'invoice',
                 'nights',
@@ -119,36 +114,34 @@ class InvoiceController extends Controller
                 'gstAmount',
                 'totalAmount'
             ))->render();
-    
-            // Write the HTML content to the PDF
+
             $mpdf->WriteHTML($html);
-    
-            // Generate dynamic filename
-            $filename = "Mr. {$invoice->customer_name} - {$invoice->destination} ({$nights} Nights / {$duration} Days) Package.pdf";
-    
-            // Return the generated PDF as a response for download
+
+            $safeName = preg_replace('/[^A-Za-z0-9\- ]/', '', $invoice->customer_name);
+            $safeDestination = preg_replace('/[^A-Za-z0-9\- ]/', '', $invoice->destination);
+            $filename = "Mr. {$safeName} - {$safeDestination} ({$nights} Nights {$duration} Days) Package.pdf";
+
             return response($mpdf->Output('', 'S'))
                 ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
-    
-        } catch (\Exception $e) {
-            // Log the error and return a response
+                ->header('Content-Disposition', 'inline; filename="' . $filename . '"');
+
+        } catch (Exception $e) {
             \Log::error('Error generating PDF: ' . $e->getMessage());
             return response('Error generating PDF: ' . $e->getMessage(), 500);
         }
     }
 
+    // Return all invoices as JSON (for DataTables, etc.)
+    public function listInvoices()
+    {
+        $invoices = Invoice::all();
+        return response()->json($invoices);
+    }
 
-public function listInvoices() {
-    $invoices = Invoice::all(); // Fetch invoices from the database
-    return response()->json($invoices); // Return as JSON
-}
-
-public function index() {
-    $invoices = Invoice::all(); // Or use paginate() if you want to paginate the results
-    return view('invoice.index', compact('invoices'));
-}
-
-    
-    
+    // Show the invoice list page
+    public function index()
+    {
+        $invoices = Invoice::all(); // Can be replaced with paginate() if needed
+        return view('invoice.index', compact('invoices'));
+    }
 }

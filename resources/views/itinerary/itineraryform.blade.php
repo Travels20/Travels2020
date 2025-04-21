@@ -4,7 +4,7 @@
     <div class="card w-100 w-md-75 mx-auto">
         <div class="card-body">
             <h5 class="card-title text-center">Tour Booking Form</h5>
-            <form action="{{ route('itinerary.store') }}" method="POST" enctype="multipart/form-data">
+            <form  id="itineraryForm">
             @csrf 
                 <div class="row">
                   
@@ -108,7 +108,7 @@
                     <!-- Flight Image -->
                     <div class="col-12 col-md-6 mb-3">
                         <label class="form-label">Flight Image (Max: 300px * 200px)</label>
-                        <input type="file" class="form-control" id="flightimages" name="flightimages" accept="image/*">
+                        <input type="file" class="form-control" id="flightimage" name="flightimage" accept="image/*">
                         <div id="imagehideflight">
                             <img id="tourImagePreviewflight" src="#" style="width: 80px; height: 80px">
                         </div>
@@ -167,3 +167,14 @@
         </div>
     </div>
 </div>
+
+@push("script")
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const tripId = {!! json_encode($id ?? null) !!};
+        if (tripId) {
+            editTour(tripId);
+        }
+    });
+</script>
+@endpush
