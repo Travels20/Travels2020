@@ -26,6 +26,7 @@ class ItineraryController extends Controller
         return view('itinerary.create');
     }
 
+    
     public function itineraryform()
     {
         $datePrefix = date('dmy');
@@ -325,7 +326,27 @@ class ItineraryController extends Controller
     //     }
     // }
 
-
+    // public function edit(int $id)
+    // {
+      
+    //     $trip = DB::table('tour_booking')->where('id', $id)->first();
+    
+    //     if (!$trip) {
+    //         return response()->json(['success' => false, 'message' => 'Trip not found.'], 404);
+    //     }
+    
+       
+    //     $vacationSummary = DB::table('vacation_summary')
+    //         ->where('fk_tour_booking', $id)
+    //         ->get();
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'trip' => $trip,
+    //         'vacation_summary' => $vacationSummary
+    //     ]);
+    // }
+    
     public function edit(int $id)
     {
         // Fetch the main trip details
@@ -341,11 +362,13 @@ class ItineraryController extends Controller
             ->get();
     
         // Return the Blade view with data
-        return view('itinerary.itineraryform', [
+        return  view('itinerary.itineraryform', [
             'trip' => $trip,
             'vacation_summary' => $vacationSummary,
-            'generatedTripId' => $trip->trip_id // if needed
+            'generatedTripId' => $trip->trip_id
         ]);
+        var_dump($trip, $vacationSummary, $trip->trip_id);
+        die();
     }
     
 
