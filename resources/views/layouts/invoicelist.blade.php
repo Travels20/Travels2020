@@ -25,7 +25,7 @@
         </div>
 
         <div class="table-responsive">
-            <table id="invoicelistTable" class="table table-bordered table-striped table-hover">
+            <table id="invoiceTable" class="table table-bordered table-striped table-hover">
                 <thead class="table-primary">
                     <tr>
                         <th scope="col">S.No</th>
@@ -40,9 +40,8 @@
                     </tr>
                 </thead>
                 <tbody id="invoiceTableBody">
-   
+                    <!-- Data will be populated here via JavaScript -->
                 </tbody>
-
             </table>
         </div>
     </div>
@@ -51,9 +50,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
-    <!-- Custom Script -->
-    <script src="{{ asset('js/listinvoice.js') }}"></script>
 
 </body>
 

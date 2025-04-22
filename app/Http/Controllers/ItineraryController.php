@@ -347,6 +347,7 @@ class ItineraryController extends Controller
     //     ]);
     // }
     
+    
     public function edit(int $id)
     {
         // Fetch the main trip details
@@ -367,8 +368,6 @@ class ItineraryController extends Controller
             'vacation_summary' => $vacationSummary,
             'generatedTripId' => $trip->trip_id
         ]);
-        var_dump($trip, $vacationSummary, $trip->trip_id);
-        die();
     }
     
 

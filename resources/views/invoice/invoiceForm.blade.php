@@ -3,8 +3,9 @@
         <div class="card w-100 w-md-75 mx-auto">
             <div class="card-body">
                 <h5 class="card-title text-center">Customer Details</h5>
-                <form id="invoiceForm" >
-                    @csrf
+                <!-- <form id="invoiceForm" > -->
+                <form id="invoiceForm" method="POST" action="{{ route('invoices.store') }}">
+                @csrf
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="customer_name" class="form-label">Customer Name:</label>

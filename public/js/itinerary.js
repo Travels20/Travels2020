@@ -186,46 +186,33 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch("/itinerary/store", {
             method: "POST",
             headers: {
-                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
             },
             body: formData
         })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Server response:", data);
+        .then(res => res.json())
+        .then(data => {
+            console.log("Server response:", data);
         
-                if (data && data.status === "success" && data.id) {
-                    const tourId = data.id;
-                    let pdfUrl = "";
+            if (data && data.id) {
+                const tourId = data.id;
+                const redirectUrl = pdfType === "Single Pdf"
+                    ? `/singlepdf-itinerary/${tourId}`
+                    : `/generatepdf.php?id=${tourId}`;
         
-                    if (pdfType === "Single Pdf") {
-                        pdfUrl = `/singlepdf-itinerary/${tourId}`;
-                    } else if (pdfType === "Multiple Pdf") {
-                        pdfUrl = `/multiplepdf-itinerary/${tourId}`;
-                    }
+                window.location.href = redirectUrl;
+            } else {
+                alert("Error processing request.");
+            }
         
-                    // Open PDF in new tab if URL is set
-                    if (pdfUrl !== "") {
-                        window.open(pdfUrl, "_blank");
-                    } else {
-                        alert("Saved successfully! No PDF type selected.");
-                    }
+            button.innerHTML = "Save";
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("An error occurred while submitting.");
+            button.innerHTML = "Save";
+        });
         
-                    // After opening PDF, redirect to admin itinerary page
-                    setTimeout(() => {
-                        window.location.href = "/adminItinerary";
-                    }, 3000); // wait 1 second before redirecting
-                } else {
-                    alert("Error: Unable to save itinerary.");
-                }
-        
-                button.innerHTML = "Save";
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                alert("An error occurred while submitting.");
-                button.innerHTML = "Save";
-            });
         
     }
 
@@ -263,91 +250,160 @@ document.addEventListener("DOMContentLoaded", function () {
         let value = parseInt(input.value) || 0;
         input.value = Math.max(min, value + delta);
     }
-
-    // Edit Mode Handling (Show or Hide elements)
-    const myParam = new URLSearchParams(window.location.search).get('id');
-    if (myParam) {
-        if (typeof editTour === 'function') {
-            editTour(myParam);
-        }
-        document.getElementById('submitButton').style.display = 'none';
-        document.getElementById('imagehide').style.display = 'block';
-        document.getElementById('imagehideflight').style.display = 'block';
-    } else {
-        document.getElementById('submitButton').style.display = 'block';
-        const updateButton = document.getElementById('updateButton');
-        if (updateButton) updateButton.style.display = 'none';
-        document.getElementById('imagehide').style.display = 'none';
-        document.getElementById('imagehideflight').style.display = 'none';
-    }
 });
 
+$(document).ready(function () {
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const myParam = urlParams.get('id');
+    if (myParam) {
+        editTour(myParam);
+        $('#submitButton').hide();
+        $('#imagehide').show();
+        $('#imagehideflight').show();
+        $('#imagehideofficer').show();
+
+    } else {
+        $('#submitButton').show();
+        $('#updateButton').hide();
+        $('#imagehide').hide();
+        $('#imagehideflight').hide();
+        $('#imagehideofficer').hide();
+    }
+    let $daysbetween = [];
+
+    document.getElementById("checkIn").addEventListener("change", calculateDays);
+    document.getElementById("checkOut").addEventListener("change", calculateDays);
+
+
+});
 
 function editTour(tripId) {
+        // Show the form
+        document.getElementById("tourForm");
+
     fetch(`/itineraryform/${tripId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+       .then(response => response.json())
         .then(data => {
             if (data.success) {
                 const trip = data.trip;
-                const vacationSummary = data.vacation_summary;
-                const daysContainer = document.getElementById("daysContainer");
 
-                // Clear previous content
+                let daysContainer = document.getElementById("daysContainer");
+
+                // Clear previous day forms
                 daysContainer.innerHTML = "";
 
-                // Populate general tour details
-                document.getElementById("id").value = trip.id;
-                document.getElementById("tripId").value = trip.trip_id;
+                // Populate form fields
+                document.getElementById("id").value = trip.id; // Assuming trip_id is disabled
+                document.getElementById("tripId").value = trip.trip_id; // Assuming trip_id is disabled
                 document.getElementById("userName").value = trip.username;
                 document.getElementById("tourName").value = trip.tour_name;
                 document.getElementById("checkIn").value = trip.check_in;
                 document.getElementById("checkOut").value = trip.check_out;
                 document.getElementById("numAdults").value = trip.adults;
                 document.getElementById("numChildren").value = trip.children;
-
-                // Set CKEditor contents
-                inclusionvalue.setData(trip.inclusion || '');
-                exclusionvalue.setData(trip.exclusion || '');
-                notevalue.setData(trip.notes || '');
-                costvalue.setData(trip.cost || '');
-                hotelvalue.setData(trip.hotel || '');
-                flightvalue.setData(trip.flight || '');
-
-                // Image previews (use Laravel's public storage path)
+                inclusionvalue.setData(trip.inclusion);
+                exclusionvalue.setData(trip.exclusion);
+                notevalue.setData(trip.notes);
+                costvalue.setData(trip.cost);
+                hotelvalue.setData(trip.hotel);
+                flightvalue.setData(trip.flight);
+                // Show image preview if available
                 if (trip.tour_image) {
-                    document.getElementById("tourImagePreview").src = `/storage/${trip.tour_image}`;
+                    document.getElementById("tourImagePreview").src = trip.tour_image;
+                    document.getElementById("tourImagePreview");
+                }
+                if (trip.tour_image) {
+                    document.getElementById("tourImagePreviewflight").src = trip.ftimage;
+                    document.getElementById("tourImagePreviewflight");
                 }
 
-                if (trip.ftimage) {
-                    document.getElementById("tourImagePreviewflight").src = `/storage/${trip.ftimage}`;
-                }
+                if (data && data.vacation_summary && data.vacation_summary.length > 0) {
+                    var vsummary = data.vacation_summary;
 
-                // Add vacation summary days
-                if (Array.isArray(vacationSummary)) {
-                    vacationSummary.forEach((day, index) => {
-                        addDay(
-                            day.stay,
-                            day.date,
-                            day.image ? `/storage/${day.image}` : "",
-                            day.itinerary_content,
-                            index + 1
-                        );
-                    });
+                    for (let i = 0; i < vsummary.length; i++) {
+                        addDay(vsummary[i].stay, vsummary[i].date, vsummary[i].image, vsummary[i].itinerary_content, i + 1);
+                    }
                 }
             } else {
-                alert("Error fetching trip data: " + (data.message || "Unknown error."));
+                alert("Error fetching trip details: " + data.message);
             }
         })
         .catch(error => {
             console.error("Error fetching trip details:", error);
-            alert("Failed to load trip details.");
         });
 }
+
+
+// function editTour(tripId) {
+//      // Show the form
+//      document.getElementById("tourForm");
+
+//     fetch(`/itineraryform/${tripId}`)
+//         .then(response => {
+//             if (!response.ok) {
+//                 throw new Error(`HTTP error! status: ${response.status}`);
+//             }
+//             return response.json();
+//         })
+//         .then(data => {
+//             if (data.success) {
+//                 const trip = data.trip;
+//                 // const vacationSummary = data.vacation_summary;
+//                 // const daysContainer = document.getElementById("daysContainer");
+//                 let daysContainer = document.getElementById("daysContainer");
+
+//                 // Clear previous content
+//                 daysContainer.innerHTML = "";
+//                 window.location.href = `/itinerary/itineraryform`;
+
+//                 // Populate general tour details
+//                 document.getElementById("id").value = trip.id;
+//                 document.getElementById("tripId").value = trip.trip_id;
+//                 document.getElementById("userName").value = trip.username;
+//                 document.getElementById("tourName").value = trip.tour_name;
+//                 document.getElementById("checkIn").value = trip.check_in;
+//                 document.getElementById("checkOut").value = trip.check_out;
+//                 document.getElementById("numAdults").value = trip.adults;
+//                 document.getElementById("numChildren").value = trip.children;
+
+//                 // Set CKEditor contents
+//                 inclusionvalue.setData(trip.inclusion || '');
+//                 exclusionvalue.setData(trip.exclusion || '');
+//                 notevalue.setData(trip.notes || '');
+//                 costvalue.setData(trip.cost || '');
+//                 hotelvalue.setData(trip.hotel || '');
+//                 flightvalue.setData(trip.flight || '');
+
+//                 if (trip.map_image) {
+//                     document.getElementById("tourImagePreview").src = trip.map_image;
+//                     document.getElementById("tourImagePreview");
+//                 }
+//                 if (trip.flightimage) {
+//                     document.getElementById("tourImagePreviewflight").src = trip.flightimage;
+//                     document.getElementById("tourImagePreviewflight");
+//                 }
+//                 if (trip.officerimage) {
+//                     document.getElementById("tourImagePreviewofficer").src = trip.officerimage;
+//                     document.getElementById("tourImagePreviewofficer");
+//                 }
+
+//                 if (data && data.vacation_summary && data.vacation_summary.length > 0) {
+//                     var vsummary = data.vacation_summary;
+
+//                     for (let i = 0; i < vsummary.length; i++) {
+//                         addDay(vsummary[i].stay, vsummary[i].date, vsummary[i].image, vsummary[i].itinerary_content, i + 1);
+//                     }
+//                 }
+//             } else {
+//                 alert("Error fetching trip data: " + (data.message || "Unknown error."));
+//             }
+//         })
+//         .catch(error => {
+//             console.error("Error fetching trip details:", error);
+//             alert("Failed to load trip details.");
+//         });
+// }
 
 
 // Update Trip Function

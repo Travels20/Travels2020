@@ -4,9 +4,10 @@
     <div class="card w-100 w-md-75 mx-auto">
         <div class="card-body">
             <h5 class="card-title text-center">Tour Booking Form</h5>
-            <form  id="itineraryForm">
+            <form  id="tourForm">
             @csrf 
                 <div class="row">
+                <input type="hidden" class="form-control" disabled id="id" name="id">
                   
                     <!-- Trip ID (display-only) -->
                     <div class="col-12 col-md-6 mb-3">
@@ -15,7 +16,7 @@
                     </div>
 
                     <!-- Hidden input to submit -->
-                    <input type="hidden" name="tripId" id="tripId" value="{{ $generatedTripId }}">
+                    <!-- <input type="hidden" name="tripId" id="tripId" value="{{ $generatedTripId }}"> -->
 
                                     
 
@@ -129,6 +130,9 @@
                     <div class="col-12 col-md-6 mb-3">
                             <label class="form-label">Officer Image (Max: 100px * 100px)</label>
                             <input type="file" class="form-control image-upload" id="officerimage" name="officerimage" accept="image/*">
+                            <div id="imagehideofficer">
+                            <img id="tourImagePreviewofficer" src="#" style="width: 80px; height: 80px">
+                        </div>
                             <!-- <img src="" class="img-preview mt-2" id="tourImagePreviewofficer" style="width: 200px; height: 200px"> -->
                     </div>
                         
@@ -168,13 +172,3 @@
     </div>
 </div>
 
-@push("script")
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const tripId = {!! json_encode($id ?? null) !!};
-        if (tripId) {
-            editTour(tripId);
-        }
-    });
-</script>
-@endpush

@@ -47,38 +47,9 @@ document.addEventListener("DOMContentLoaded", function () {
             new DataTable('#itinerarylistTable');
         })
         .catch(error => {
-            console.error("Error fetching itinerary data:", error);
+            // console.error("Error fetching itinerary data:", error);
         });
 });
 
 
 
-
-fetch(`/itinerary/${id}`, {
-    method: "POST",
-    headers: {
-        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-    },
-    body: formData
-})
-.then(response => response.json())
-.then(data => {
-    if (data.success) {
-        if (pdfType === 'Single Pdf') {
-            window.open(`/singlepdf-itinerary/${id}`, "_blank");
-        } else if (pdfType === 'Multiple Pdf') {
-            window.open(`/multiplepdf-itinerary/${id}`, "_blank");
-        } else {
-            alert("Data updated successfully!");
-        }
-
-        setTimeout(() => {
-            window.location.href = "/adminitinerary";
-        }, 1000);
-    } else {
-        alert("Error updating itinerary: " + data.message);
-    }
-})
-.catch(error => {
-    console.error("Error updating trip:", error);
-});
