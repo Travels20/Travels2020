@@ -1,5 +1,5 @@
 <script>
-    var bookingCore = {
+    var travels2020 = {
         url: '{{url('/')}}',
         admin_url: '{{route('admin.index')}}',
         map_provider: '{{setting_item('map_provider')}}',

@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    fetch("/listitineray") // Make sure this route returns JSON properly
+    fetch("/listitinerary") // Make sure this route returns JSON properly
         .then(response => {
             if (!response.ok) {
                 throw new Error("Failed to fetch itinerary data.");

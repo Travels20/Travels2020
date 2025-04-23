@@ -59,7 +59,7 @@ Route::get('/itinerary/itineraryform', [ItineraryController::class, 'itineraryfo
 Route::post('/itinerary/store', [ItineraryController::class, 'store'])->name('itinerary.store');
 Route::get('/singlepdf-itinerary/{id}', [ItineraryController::class, 'singlepdf'])->name('itineary.singlepdf');
 Route::get('/multiplepdf-itinerary/{id}', [ItineraryController::class, 'multiplepdf'])->name('itineary.multiplepdf');
-Route::get('/listitineray', [ItineraryController::class, 'listitineray']);
+Route::get('/listitinerary', [ItineraryController::class, 'listitinerary']);
 // Route::post('/itinerary/delete', [ItineraryController::class, 'delete']);
 Route::get('/itineraryform/{id}', [ItineraryController::class, 'edit']);
 
@@ -74,7 +74,7 @@ Route::post('/customers', [CustomerController::class, 'store'])->name('customers
 
 //invoices
 Route::post('/invoices/store', [InvoiceController::class, 'store'])->name('invoices.store');
-Route::get('invoices/list', [InvoiceController::class, 'getInvoices'])->name('invoices.list');
+// Route::get('invoices/list', [InvoiceController::class, 'getInvoices'])->name('invoices.list');
 Route::get('/invoicepdf/{id}', [InvoiceController::class, 'generatePDF'])->name('invoice.invoicepdf');
 Route::get('/invoices/invoiceForm', [InvoiceController::class, 'invoiceForm'])->name('invoice.invoiceForm');
 Route::get('/listinvoices', [InvoiceController::class, 'listInvoices']);

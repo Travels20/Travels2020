@@ -43,6 +43,8 @@ $groups = \Modules\Core\Helpers\AdminMenuManager::groups_with_children();
                 </ul>
             @endif
         </li>
+       
     @endforeach
     @endforeach
+    <li>Itinerary</li>
 </ul>

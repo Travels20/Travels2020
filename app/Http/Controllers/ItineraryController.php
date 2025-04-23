@@ -308,45 +308,12 @@ class ItineraryController extends Controller
     }
     
 
-    public function listitineray()
+    public function listitinerary()
     {
         $trips = tour_booking::all(); // or paginate if needed
         return response()->json($trips);
     }
 
-    // public function delete(Request $request)
-    // {
-    //     $tripId = $request->trip_id;
-    //     $deleted = tour_booking::where('id', $tripId)->delete();
-
-    //     if ($deleted) {
-    //         return response()->json(['success' => true, 'message' => 'Trip deleted successfully.']);
-    //     } else {
-    //         return response()->json(['success' => false, 'message' => 'Trip not found.']);
-    //     }
-    // }
-
-    // public function edit(int $id)
-    // {
-      
-    //     $trip = DB::table('tour_booking')->where('id', $id)->first();
-    
-    //     if (!$trip) {
-    //         return response()->json(['success' => false, 'message' => 'Trip not found.'], 404);
-    //     }
-    
-       
-    //     $vacationSummary = DB::table('vacation_summary')
-    //         ->where('fk_tour_booking', $id)
-    //         ->get();
-    
-    //     return response()->json([
-    //         'success' => true,
-    //         'trip' => $trip,
-    //         'vacation_summary' => $vacationSummary
-    //     ]);
-    // }
-    
     
     public function edit(int $id)
     {
