@@ -60,13 +60,10 @@ Route::post('/itinerary/store', [ItineraryController::class, 'store'])->name('it
 Route::get('/singlepdf-itinerary/{id}', [ItineraryController::class, 'singlepdf'])->name('itineary.singlepdf');
 Route::get('/multiplepdf-itinerary/{id}', [ItineraryController::class, 'multiplepdf'])->name('itineary.multiplepdf');
 Route::get('/listitinerary', [ItineraryController::class, 'listitinerary']);
-// Route::post('/itinerary/delete', [ItineraryController::class, 'delete']);
-Route::get('/itineraryform/{id}', [ItineraryController::class, 'edit']);
-
-// Route::get('/itinerary/itineraryform/{id}', [ItineraryController::class, 'itineraryform'])->name('itinerary.itineraryform');
-
-// Route to update trip (form submission)
 Route::post('/itinerary/{id}', [ItineraryController::class, 'update']);
+Route::get('/itineraryform/{id}', [ItineraryController::class, 'edit']);
+Route::get('/api/itineraryform/{id}', [ItineraryController::class, 'fetch']);
+
 
 //customers
 Route::get('/customers/customerform', [CustomerController::class, 'customerform'])->name('customers.customerform');

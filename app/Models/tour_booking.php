@@ -24,8 +24,8 @@ class tour_booking extends Model
         'cost',
         'hotel',
         'flight',
-        'map_image',
-        'flightimage',
+        'tour_image',
+        'ftimage',
         'officerimage',
         'officerName',
         

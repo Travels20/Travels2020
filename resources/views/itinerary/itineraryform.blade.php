@@ -8,6 +8,7 @@
             @csrf 
                 <div class="row">
                 <input type="hidden" class="form-control" disabled id="id" name="id">
+
                   
                     <!-- Trip ID (display-only) -->
                     <div class="col-12 col-md-6 mb-3">
@@ -16,7 +17,7 @@
                     </div>
 
                     <!-- Hidden input to submit -->
-                    <!-- <input type="hidden" name="tripId" id="tripId" value="{{ $generatedTripId }}"> -->
+                    <input type="hidden" name="tripId" id="tripId" value="{{ $generatedTripId }}">
 
                                     
 
@@ -133,7 +134,6 @@
                             <div id="imagehideofficer">
                             <img id="tourImagePreviewofficer" src="#" style="width: 80px; height: 80px">
                         </div>
-                            <!-- <img src="" class="img-preview mt-2" id="tourImagePreviewofficer" style="width: 200px; height: 200px"> -->
                     </div>
                         
                 </div>        

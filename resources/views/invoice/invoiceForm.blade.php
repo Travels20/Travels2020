@@ -1,4 +1,5 @@
 @extends('layouts.itineraryapp')
+
 <div class="container mt-4">
         <div class="card w-100 w-md-75 mx-auto">
             <div class="card-body">

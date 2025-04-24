@@ -2,11 +2,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const tableBody = document.getElementById("itineraryTableBody");
     const table = document.querySelector("#itinerarylistTable");
 
-    // ✅ Check if the table body exists
-    if (!tableBody || !table) {
-        console.error("Table or table body element not found in the DOM.");
-        return;
-    }
 
     fetch("/listitinerary") // Make sure this route returns JSON properly
         .then(response => {
@@ -44,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             // ✅ Initialize DataTable
-            new DataTable('#itinerarylistTable');
+            new DataTable(table);
         })
         .catch(error => {
             // console.error("Error fetching itinerary data:", error);

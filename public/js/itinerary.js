@@ -1,4 +1,6 @@
-document.addEventListener("DOMContentLoaded", function () {
+
+
+$(document).ready(function () {
     // Event listener for check-in and check-out date changes
     const checkInInput = document.getElementById("checkIn");
     const checkOutInput = document.getElementById("checkOut");
@@ -94,6 +96,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
     checkInInput.addEventListener("change", calculateDays);
     checkOutInput.addEventListener("change", calculateDays);
+    
+    // Initialize CKEditor for other fields dynamically
+    var hotelvalue, flightvalue, inclusionvalue, exclusionvalue, notevalue, costvalue;
+
+    function initializeEditor(selector, callback) {
+        const element = document.querySelector(selector);
+        if (element) {
+            ClassicEditor.create(element)
+                .then(editor => {
+                    callback(editor);
+                    editor.model.document.on('change:data', () => {
+                        // console.log(`${selector} content changed:`, editor.getData());
+                    });
+                })
+                .catch(error => console.error(`Error initializing ${selector}:`, error));
+        } else {
+            console.error(`Element ${selector} not found in the DOM.`);
+        }
+    }
+
+    // Initialize each CKEditor
+    initializeEditor('#hotel', editor => hotelvalue = editor);
+    initializeEditor('#flight', editor => flightvalue = editor);
+    initializeEditor('#inclusion', editor => inclusionvalue = editor);
+    initializeEditor('#exclusion', editor => exclusionvalue = editor);
+    initializeEditor('#notes', editor => notevalue = editor);
+    initializeEditor('#cost', editor => costvalue = editor);
 
     // Form submission logic
     const submitButton = document.getElementById("submitButton");
@@ -201,6 +230,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     : `/generatepdf.php?id=${tourId}`;
         
                 window.location.href = redirectUrl;
+                // Then redirect after a short delay
+                setTimeout(() => {
+                    window.location.href = "/adminItinerary";
+                }, 6000); 
             } else {
                 alert("Error processing request.");
             }
@@ -217,32 +250,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // Initialize CKEditor for other fields dynamically
-    var hotelvalue, flightvalue, inclusionvalue, exclusionvalue, notevalue, costvalue;
-
-    function initializeEditor(selector, callback) {
-        const element = document.querySelector(selector);
-        if (element) {
-            ClassicEditor.create(element)
-                .then(editor => {
-                    callback(editor);
-                    editor.model.document.on('change:data', () => {
-                        // console.log(`${selector} content changed:`, editor.getData());
-                    });
-                })
-                .catch(error => console.error(`Error initializing ${selector}:`, error));
-        } else {
-            console.error(`Element ${selector} not found in the DOM.`);
-        }
-    }
-
-    // Initialize each CKEditor
-    initializeEditor('#hotel', editor => hotelvalue = editor);
-    initializeEditor('#flight', editor => flightvalue = editor);
-    initializeEditor('#inclusion', editor => inclusionvalue = editor);
-    initializeEditor('#exclusion', editor => exclusionvalue = editor);
-    initializeEditor('#notes', editor => notevalue = editor);
-    initializeEditor('#cost', editor => costvalue = editor);
 
     // Helper function to adjust adult/children count
     function adjustCount(selector, delta, min) {
@@ -250,19 +257,22 @@ document.addEventListener("DOMContentLoaded", function () {
         let value = parseInt(input.value) || 0;
         input.value = Math.max(min, value + delta);
     }
-});
 
-$(document).ready(function () {
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const myParam = urlParams.get('id');
-    if (myParam) {
-        editTour(myParam);
+
+
+    // Extract trip ID from the URL (assuming format like /itineraryform/123)
+    const pathSegments = window.location.pathname.split('/');
+    const tripId = pathSegments[pathSegments.length - 1];
+
+    if (tripId && !isNaN(tripId)) {
+        editTour(tripId);
+
         $('#submitButton').hide();
+        $('#updateButton').show();
         $('#imagehide').show();
         $('#imagehideflight').show();
         $('#imagehideofficer').show();
-
     } else {
         $('#submitButton').show();
         $('#updateButton').hide();
@@ -270,60 +280,61 @@ $(document).ready(function () {
         $('#imagehideflight').hide();
         $('#imagehideofficer').hide();
     }
-    let $daysbetween = [];
 
-    document.getElementById("checkIn").addEventListener("change", calculateDays);
-    document.getElementById("checkOut").addEventListener("change", calculateDays);
-
-
-});
 
 function editTour(tripId) {
-        // Show the form
-        document.getElementById("tourForm");
-
-    fetch(`/itineraryform/${tripId}`)
-       .then(response => response.json())
+    fetch(`/api/itineraryform/${tripId}`)
+        .then(response => response.json())
         .then(data => {
             if (data.success) {
                 const trip = data.trip;
 
-                let daysContainer = document.getElementById("daysContainer");
+                $('#id').val(trip.id);
+                $('#tripId').val(trip.trip_id);
+                $('#userName').val(trip.username);
+                $('#tourName').val(trip.tour_name);
+                $('#checkIn').val(trip.check_in);
+                $('#checkOut').val(trip.check_out);
+                $('#numAdults').val(trip.adults);
+                $('#numChildren').val(trip.children);
+                $('#officerName').val(trip.officerName);
+                
+                // CKEditor fields
+                
+                // inclusionvalue.setData(trip.inclusion);
+                // exclusionvalue.setData(trip.exclusion);
+                // notevalue.setData();
+                // costvalue.setData();
+                // hotelvalue.setData();
+                // flightvalue.setData();
 
-                // Clear previous day forms
-                daysContainer.innerHTML = "";
+                // Use CKEditor instances to set content if present
+                if (typeof inclusionvalue !== 'undefined') inclusionvalue.setData(trip.inclusion);
+                if (typeof exclusionvalue !== 'undefined') exclusionvalue.setData(trip.exclusion);
+                if (typeof notevalue !== 'undefined') notevalue.setData(trip.notes);
+                if (typeof costvalue !== 'undefined') costvalue.setData(trip.cost);
+                if (typeof hotelvalue !== 'undefined') hotelvalue.setData(trip.hotel);
+                if (typeof flightvalue !== 'undefined') flightvalue.setData(trip.flight);
 
-                // Populate form fields
-                document.getElementById("id").value = trip.id; // Assuming trip_id is disabled
-                document.getElementById("tripId").value = trip.trip_id; // Assuming trip_id is disabled
-                document.getElementById("userName").value = trip.username;
-                document.getElementById("tourName").value = trip.tour_name;
-                document.getElementById("checkIn").value = trip.check_in;
-                document.getElementById("checkOut").value = trip.check_out;
-                document.getElementById("numAdults").value = trip.adults;
-                document.getElementById("numChildren").value = trip.children;
-                inclusionvalue.setData(trip.inclusion);
-                exclusionvalue.setData(trip.exclusion);
-                notevalue.setData(trip.notes);
-                costvalue.setData(trip.cost);
-                hotelvalue.setData(trip.hotel);
-                flightvalue.setData(trip.flight);
-                // Show image preview if available
+                // Image preview
                 if (trip.tour_image) {
-                    document.getElementById("tourImagePreview").src = trip.tour_image;
-                    document.getElementById("tourImagePreview");
+                    $('#tourImagePreview').attr('src', trip.tour_image);
                 }
-                if (trip.tour_image) {
-                    document.getElementById("tourImagePreviewflight").src = trip.ftimage;
-                    document.getElementById("tourImagePreviewflight");
+                if (trip.ftimage) {
+                    $('#tourImagePreviewflight').attr('src', trip.ftimage);
+                }
+                if (trip.officerimage) {
+                    $('#tourImagePreviewofficer').attr('src', trip.officerimage);
                 }
 
-                if (data && data.vacation_summary && data.vacation_summary.length > 0) {
-                    var vsummary = data.vacation_summary;
+                // Vacation summary
+                let daysContainer = $('#daysContainer');
+                daysContainer.empty();
 
-                    for (let i = 0; i < vsummary.length; i++) {
-                        addDay(vsummary[i].stay, vsummary[i].date, vsummary[i].image, vsummary[i].itinerary_content, i + 1);
-                    }
+                if (data.vacation_summary && data.vacation_summary.length > 0) {
+                    data.vacation_summary.forEach((summary, index) => {
+                        addDay(summary.stay, summary.date, summary.image, summary.itinerary_content, index + 1);
+                    });
                 }
             } else {
                 alert("Error fetching trip details: " + data.message);
@@ -406,7 +417,11 @@ function editTour(tripId) {
 // }
 
 
+
 // Update Trip Function
+
+
+
 $("#updateButton").on("click", function () {
     let daysContainer = document.getElementById("daysContainer");
     let dayForms = daysContainer.getElementsByClassName("update-day-form");
@@ -451,6 +466,7 @@ $("#updateButton").on("click", function () {
     let checkOut = document.getElementById("checkOut").value.trim();
     let numAdults = document.getElementById("numAdults").value.trim();
     let numChildren = document.getElementById("numChildren").value.trim();
+    let officerName = document.getElementById("officerName").value.trim();
     let inclusion = inclusionvalue.getData();
     let exclusion = exclusionvalue.getData();
     let notes = notevalue.getData();
@@ -459,10 +475,12 @@ $("#updateButton").on("click", function () {
     let hotel = hotelvalue.getData();
     let flight = flightvalue.getData();
     let tourImages = document.getElementById("timages").files[0] || null;
-    let flightImages = document.getElementById("flightimages").files[0] || null;
+    let flightImages = document.getElementById("flightimage").files[0] || null;
+    let officerImage = document.getElementById("officerimage").files[0] || null;
 
     if (tourImages) formData.append("tourImages", tourImages);
     if (flightImages) formData.append("flightimages", flightImages);
+    if (officerImage) formData.append("officerimage", officerImage);
 
     if (!tripId || !tourName || !checkIn || !checkOut || !numAdults || !numChildren) {
         errorMessages.push("Please fill in all required trip details.");
@@ -488,6 +506,7 @@ $("#updateButton").on("click", function () {
     formData.append("cost", cost);
     formData.append("hotel", hotel);
     formData.append("flight", flight);
+    formData.append("officerName", officerName);
 
     fetch(`/itinerary/${id}`, {
         method: "POST",
@@ -499,17 +518,16 @@ $("#updateButton").on("click", function () {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            if (pdfType === 'Single Pdf') {
-                window.open(`/singlepdf-itinerary/${id}`, "_blank");
-            } else if (pdfType === 'Multiple Pdf') {
-                window.open(`/multiplepdf-itinerary/${id}`, "_blank");
-            } else {
-                alert("Data updated successfully!");
-            }
+            const downloadUrl = pdfType === 'Single Pdf'
+                ? `/singlepdf-itinerary/${id}`
+                : `/multiplepdf-itinerary/${id}`;
 
-            setTimeout(() => {
-                window.location.href = "/adminitinerary";
-            }, 1000);
+            // Trigger the download
+            window.location.href = downloadUrl;
+
+            // setTimeout(() => {
+            //     window.location.href = "/adminitinerary";
+            // }, 1000);
         } else {
             alert("Error updating itinerary: " + data.message);
         }
@@ -568,6 +586,7 @@ function addDay(stay, date, image, itinerary, dayCount) {
     ClassicEditor.create(newDay.querySelector(`#${uniqueId}`))
         .catch(error => console.error("Error initializing CKEditor:", error));
 }
+});
 
 
 

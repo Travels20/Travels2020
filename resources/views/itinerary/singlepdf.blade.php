@@ -89,13 +89,13 @@
     </h1>
 
     @php
-        $tourImage = $row->map_image;
+        $tourImage = $row->tour_image;
         if (pathinfo($tourImage, PATHINFO_EXTENSION) == 'png') {
             $tourImage = str_replace('.png', '.jpg', $tourImage); 
         }
     @endphp
-    <!-- <img src="{{ $row->map_image }}"> -->
-    <img src="{{ $row->map_image }}" width="100%" height="50%">
+  
+    <img src="{{ $row->tour_image }}" width="100%" height="50%">
 
     <div class="box">
         <table>
@@ -156,8 +156,8 @@
         <!-- @if (!empty($row->flightimage))
             <img src="{{ public_path($row->flightimage) }}" width="100%" height="auto"><br><br>
         @endif -->
-        @if (!empty($row->flightimage))
-            <img src="{{ $row->flightimage }}" width="100%" height="auto"><br><br>
+        @if (!empty($row->ftimage))
+            <img src="{{ $row->ftimage }}" width="100%" height="auto"><br><br>
         @endif
 
     @endif

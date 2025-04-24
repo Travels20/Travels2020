@@ -27,27 +27,53 @@ class ItineraryController extends Controller
     }
 
     
-    public function itineraryform()
-    {
-        $datePrefix = date('dmy');
+    // public function itineraryform()
+    // {
+       
 
-        $latestTrip = DB::table('tour_booking')
-            ->where('trip_id', 'like', "T20{$datePrefix}%")
-            ->orderByDesc('trip_id')
-            ->first();
-
-
-        $newDigits = $latestTrip
-            ? str_pad((int) substr($latestTrip->trip_id, -4) + 1, 4, '0', STR_PAD_LEFT)
-            : '1001';
+    //     $latestTrip = DB::table('tour_booking')
+    //         ->where('trip_id', 'like', "TR2020")
+    //         ->orderByDesc('trip_id')
+    //         ->first();
 
 
-        $generatedTripId = "T20{$datePrefix}{$newDigits}";
+    //     $newDigits = $latestTrip
+    //         ? str_pad((int) substr($latestTrip->trip_id, -4) + 1, 4, '0', STR_PAD_LEFT)
+    //         : '1001';
 
-        return view('itinerary.itineraryform', [
-            'generatedTripId' => $generatedTripId
-        ]);
+
+    //     $generatedTripId = "TR020{$newDigits}";
+
+    //     return view('itinerary.itineraryform', [
+    //         'generatedTripId' => $generatedTripId
+    //     ]);
+    // }
+
+
+public function itineraryform()
+{
+    // Get the latest trip with trip_id starting with 'TR2020'
+    $latestTrip = DB::table('tour_booking')
+        ->where('trip_id', 'like', 'TR2020%')
+        ->orderByDesc('trip_id')
+        ->first();
+
+    if ($latestTrip && preg_match('/TR2020(\d+)/', $latestTrip->trip_id, $matches)) {
+        $lastNumber = (int) $matches[1];
+        $newNumber = $lastNumber + 1;
+    } else {
+        $newNumber = 1001; 
     }
+
+   
+    $newDigits = str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+    $generatedTripId = "TR2020{$newDigits}";
+
+    return view('itinerary.itineraryform', [
+        'generatedTripId' => $generatedTripId
+    ]);
+}
+
 
     public function store(Request $request)
     {
@@ -72,11 +98,10 @@ class ItineraryController extends Controller
 
         Log::info('Form Data:', $request->all());
 
-    if (empty($validated['tripId'])) {
-        $datePrefix = date('dmy');  
+    if (empty($validated['tripId'])) { 
 
         $latestTrip = DB::table('tour_booking')
-            ->where('trip_id', 'like', "T20{$datePrefix}%")  
+            ->where('trip_id', 'like', "TR2020")  
             ->orderByDesc('trip_id')  
             ->first(); 
 
@@ -84,7 +109,7 @@ class ItineraryController extends Controller
         $newDigits = $latestTrip
             ? str_pad((int) substr($latestTrip->trip_id, -4) + 1, 4, '0', STR_PAD_LEFT)  
             : '1001';  
-        $generatedTripId = "T20{$datePrefix}{$newDigits}"; 
+        $generatedTripId = "TR2020{$newDigits}"; 
     } else {
        
         $generatedTripId = $validated['tripId'];
@@ -110,7 +135,6 @@ class ItineraryController extends Controller
     
 
         try {
-            // ✅ Save to tour_booking table
             $tourBookingData = [
                 'trip_id'       => $generatedTripId,
                 'username'      => $validated['userName'],
@@ -122,11 +146,11 @@ class ItineraryController extends Controller
                 'inclusion'     => $validated['inclusion'] ?? '',
                 'exclusion'     => $validated['exclusion'] ?? '',
                 'cost'          => $validated['cost'] ?? '',
-                'map_image'     => $uploadedImages['tourImage'] ?? '',
+                'tour_image'     => $uploadedImages['tourImage'] ?? '',
                 'notes'         => $validated['notes'] ?? '',
                 'hotel'         => $validated['hotel'] ?? '',
                 'flight'        => $validated['flight'] ?? '',
-                'flightimage'   => $uploadedImages['flightimage'] ?? '',
+                'ftimage'   => $uploadedImages['flightimage'] ?? '',
                 'officerName'   => $validated['officerName'],
                 'officerimage'  => $uploadedImages['officerimage'] ?? '',
                 'created_at'    => now(),
@@ -169,65 +193,135 @@ class ItineraryController extends Controller
         }
     }
 
+    // public function singlepdf($id)
+    // {
+    //     try {
+    //         if (!is_numeric($id)) {
+    //             return response("Invalid Tour ID.", 400);
+    //         }
+
+    //         $row = DB::table('tour_booking as tb')
+    //             ->leftJoin('vacation_summary as vs', 'vs.fk_tour_booking', '=', 'tb.id')
+    //             ->where('tb.id', $id)
+    //             ->select('tb.*', 'vs.*')
+    //             ->first();
+
+    //         if (!$row) {
+    //             throw new Exception("No records found for Tour ID: " . $id);
+    //         }
+
+    //         $checkInDate = new \DateTime($row->check_in);
+    //         $checkOutDate = new \DateTime($row->check_out);
+    //         $duration = $checkInDate->diff($checkOutDate)->days + 1;
+    //         $nights = $duration - 1;
+
+    //         $whatsappLink = "https://wa.me/919445552020?text=" . urlencode("Hello, I would like to know more information about our tour {$row->tour_name} trip Id: {$row->trip_id}");
+    //         $razorpayLink = "https://pages.razorpay.com/travels2020";
+
+    //         $vacationResults = DB::table('vacation_summary')->where('fk_tour_booking', $id)->get();
+
+
+    //         $html = view('itinerary.singlepdf', [
+    //             'row' => $row,
+    //             'vacationResults' => $vacationResults,
+    //             'checkInDate' => $checkInDate,
+    //             'checkOutDate' => $checkOutDate,
+    //             'duration' => $duration,
+    //             'nights' => $nights,
+    //             'whatsappLink' => $whatsappLink,
+    //             'razorpayLink' => $razorpayLink
+    //         ])->render();
+
+    //         $mpdf = new Mpdf([
+    //             'format' => [193.5, 5000],
+    //             'margin_top' => 10,
+    //             'margin_bottom' => 15,
+    //             'margin_left' => 15,
+    //             'margin_right' => 15,
+    //         ]);
+    //         $mpdf->SetAutoPageBreak(false);
+    //         $mpdf->WriteHTML($html);
+
+    //         $filename = "Mr. {$row->username}-{$row->tour_name} ({$nights} Nights / {$duration} Days) Package.pdf";
+
+    //         return response($mpdf->Output($filename, 'S'), 200)
+    //             ->header('Content-Type', 'application/pdf')
+    //             ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
+
+    //     } catch (Exception $e) {
+    //         return response("Error: " . $e->getMessage(), 500);
+    //     }
+    // }
+
     public function singlepdf($id)
-    {
-        try {
-            if (!is_numeric($id)) {
-                return response("Invalid Tour ID.", 400);
-            }
-
-            $row = DB::table('tour_booking as tb')
-                ->leftJoin('vacation_summary as vs', 'vs.fk_tour_booking', '=', 'tb.id')
-                ->where('tb.id', $id)
-                ->select('tb.*', 'vs.*')
-                ->first();
-
-            if (!$row) {
-                throw new Exception("No records found for Tour ID: " . $id);
-            }
-
-            $checkInDate = new \DateTime($row->check_in);
-            $checkOutDate = new \DateTime($row->check_out);
-            $duration = $checkInDate->diff($checkOutDate)->days + 1;
-            $nights = $duration - 1;
-
-            $whatsappLink = "https://wa.me/919445552020?text=" . urlencode("Hello, I would like to know more information about our tour {$row->tour_name} trip Id: {$row->trip_id}");
-            $razorpayLink = "https://pages.razorpay.com/travels2020";
-
-            $vacationResults = DB::table('vacation_summary')->where('fk_tour_booking', $id)->get();
-
-
-            $html = view('itinerary.singlepdf', [
-                'row' => $row,
-                'vacationResults' => $vacationResults,
-                'checkInDate' => $checkInDate,
-                'checkOutDate' => $checkOutDate,
-                'duration' => $duration,
-                'nights' => $nights,
-                'whatsappLink' => $whatsappLink,
-                'razorpayLink' => $razorpayLink
-            ])->render();
-
-            $mpdf = new Mpdf([
-                'format' => [193.5, 3800],
-                'margin_top' => 10,
-                'margin_bottom' => 15,
-                'margin_left' => 15,
-                'margin_right' => 15,
-            ]);
-            $mpdf->SetAutoPageBreak(false);
-            $mpdf->WriteHTML($html);
-
-            $filename = "Mr. {$row->username}-{$row->tour_name} ({$nights} Nights / {$duration} Days) Package.pdf";
-
-            return response($mpdf->Output($filename, 'S'), 200)
-                ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
-
-        } catch (Exception $e) {
-            return response("Error: " . $e->getMessage(), 500);
+{
+    try {
+        if (!is_numeric($id)) {
+            return response("Invalid Tour ID.", 400);
         }
+
+        $row = DB::table('tour_booking as tb')
+            ->leftJoin('vacation_summary as vs', 'vs.fk_tour_booking', '=', 'tb.id')
+            ->where('tb.id', $id)
+            ->select('tb.*', 'vs.*')
+            ->first();
+
+        if (!$row) {
+            throw new Exception("No records found for Tour ID: " . $id);
+        }
+
+        $checkInDate = new \DateTime($row->check_in);
+        $checkOutDate = new \DateTime($row->check_out);
+        $duration = $checkInDate->diff($checkOutDate)->days + 1;
+        $nights = $duration - 1;
+
+        $whatsappLink = "https://wa.me/919445552020?text=" . urlencode("Hello, I would like to know more information about our tour {$row->tour_name} trip Id: {$row->trip_id}");
+        $razorpayLink = "https://pages.razorpay.com/travels2020";
+
+        $vacationResults = DB::table('vacation_summary')->where('fk_tour_booking', $id)->get();
+
+        $html = view('itinerary.singlepdf', [
+            'row' => $row,
+            'vacationResults' => $vacationResults,
+            'checkInDate' => $checkInDate,
+            'checkOutDate' => $checkOutDate,
+            'duration' => $duration,
+            'nights' => $nights,
+            'whatsappLink' => $whatsappLink,
+            'razorpayLink' => $razorpayLink
+        ])->render();
+
+        $boxCount = substr_count($html, 'class="box"');
+        $boxHeightMm = 90; // Adjust this based on design
+        $nonBoxContentHeight = 2300; // Header + title + images + other sections
+
+        $estimatedHeight = ($boxCount * $boxHeightMm) + $nonBoxContentHeight;
+        $maxHeight = 20000;
+        $finalHeight = min($estimatedHeight, $maxHeight);
+
+        // ✅ Generate PDF
+        $mpdf = new \Mpdf\Mpdf([
+            'format' => [193.5, $finalHeight],
+            'margin_top' => 10,
+            'margin_bottom' => 15,
+            'margin_left' => 15,
+            'margin_right' => 15,
+        ]);
+
+        $mpdf->SetAutoPageBreak(false);
+        $mpdf->WriteHTML($html);
+
+        $filename = "Mr. {$row->username}-{$row->tour_name} ({$nights} Nights / {$duration} Days) Package.pdf";
+
+        return response($mpdf->Output($filename, 'S'), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
+
+    } catch (Exception $e) {
+        return response("Error: " . $e->getMessage(), 500);
     }
+}
+
 
     public function multiplepdf($id)
     {
@@ -336,11 +430,51 @@ class ItineraryController extends Controller
             'generatedTripId' => $trip->trip_id
         ]);
     }
-    
+
+    public function fetch(int $id)
+{
+    $trip = DB::table('tour_booking')->where('id', $id)->first();
+
+    if (!$trip) {
+        return response()->json(['success' => false, 'message' => 'Trip not found']);
+    }
+
+    $vacationSummary = DB::table('vacation_summary')
+        ->where('fk_tour_booking', $id)
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'trip' => $trip,
+        'vacation_summary' => $vacationSummary
+    ]);
+}
+
+
 
 public function update(Request $request, $id)
 {
     try {
+       
+        $request->validate([
+            'tripId' => 'required',
+            'userName' => 'required|string',
+            'tourName' => 'required|string',
+            'checkIn' => 'required|date',
+            'checkOut' => 'required|date',
+            'numAdults' => 'required|integer',
+            'numChildren' => 'required|integer',
+            'inclusion' => 'nullable|string',
+            'exclusion' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'cost' => 'nullable|string',
+            'hotel' => 'nullable|string',
+            'flight' => 'nullable|string',
+            'tourImages' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'flightimages' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+        ]);
+
+        
         DB::table('tour_booking')->where('id', $id)->update([
             'trip_id' => $request->tripId,
             'username' => $request->userName,
@@ -357,38 +491,74 @@ public function update(Request $request, $id)
             'flight' => $request->flight,
         ]);
 
-        // Handle file uploads
+       
         if ($request->hasFile('tourImages')) {
-            $path = $request->file('tourImages')->store('public/tour_images');
-            DB::table('tour_booking')->where('id', $id)->update(['tour_image' => $path]);
-        }
-
-        if ($request->hasFile('flightimages')) {
-            $path = $request->file('flightimages')->store('public/flight_images');
-            DB::table('tour_booking')->where('id', $id)->update(['ftimage' => $path]);
-        }
-
-        // Update vacation_summary
-        DB::table('vacation_summary')->where('fk_tour_booking', $id)->delete(); // Clear old
-
-        foreach ($request->days as $day) {
-            $imagePath = null;
-            if (isset($day['vsImages'])) {
-                $imagePath = $day['vsImages']->store('public/vacation_images');
-            }
-
-            DB::table('vacation_summary')->insert([
-                'fk_tour_booking' => $id,
-                'stay' => $day['stay'],
-                'date' => $day['date'],
-                'itinerary_content' => $day['itinerary'],
-                'image' => $imagePath,
+            $tourImage = $request->file('tourImages');
+            $uploadedImage = Cloudinary::upload($tourImage->getRealPath(), [
+                'folder' => 'tour_images'
             ]);
+            $tourImagePath = $uploadedImage->getSecurePath(); 
+            DB::table('tour_booking')->where('id', $id)->update(['tour_image' => $tourImagePath]);
         }
 
-        return response()->json(['success' => true, 'message' => 'Trip updated successfully.']);
+        
+        if ($request->hasFile('flightimages')) {
+            $flightImage = $request->file('flightimages');
+            $uploadedFlightImage = Cloudinary::upload($flightImage->getRealPath(), [
+                'folder' => 'flight_images'
+            ]);
+            $flightImagePath = $uploadedFlightImage->getSecurePath(); 
+            DB::table('tour_booking')->where('id', $id)->update(['ftimage' => $flightImagePath]);
+        }
+
+        // Delete old vacation summary
+        // DB::table('vacation_summary')->where('fk_tour_booking', $id)->delete();
+
+        if ($request->has('days')) {
+            foreach ($request->days as $index => $day) {
+                $existingDay = DB::table('vacation_summary')
+                    ->where('fk_tour_booking', $id)
+                    ->where('date', $day['date'] ?? '')
+                    ->first();
+        
+                $vsImagePath = $existingDay->image ?? null;
+        
+                if ($request->hasFile("days.$index.vsImages")) {
+                    $dayImage = $request->file("days.$index.vsImages");
+                    $uploadedDayImage = Cloudinary::upload($dayImage->getRealPath(), ['folder' => 'Travels2020/day_images']);
+                    $vsImagePath = $uploadedDayImage->getSecurePath();
+                }
+        
+                if ($existingDay) {
+                    DB::table('vacation_summary')
+                        ->where('id', $existingDay->id)
+                        ->update([
+                            'stay' => $day['stay'] ?? '',
+                            'itinerary_content' => $day['itinerary'] ?? '',
+                            'image' => $vsImagePath,
+                        ]);
+                } else {
+                    DB::table('vacation_summary')->insert([
+                        'fk_tour_booking' => $id,
+                        'stay' => $day['stay'] ?? '',
+                        'date' => $day['date'] ?? '',
+                        'itinerary_content' => $day['itinerary'] ?? '',
+                        'image' => $vsImagePath,
+                    ]);
+                }
+            }
+        }
+        
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Trip updated successfully.'
+        ]);
     } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        return response()->json([
+            'success' => false,
+            'message' => 'Update failed: ' . $e->getMessage()
+        ], 500);
     }
 }
 

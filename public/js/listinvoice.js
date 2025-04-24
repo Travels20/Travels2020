@@ -103,9 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <a href="/invoicepdf/${invoice.id}" target="_blank" title="View PDF">
                         <button class="btn btn-info btn-sm"><i class="fas fa-eye"></i></button>
                     </a>
-                    <button class="btn btn-danger btn-sm" onclick="deleteInvoice(${invoice.id})">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
+                   
                 </td>
             `;
 
