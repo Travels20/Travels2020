@@ -1,7 +1,7 @@
 <?php
 use \Illuminate\Support\Facades\Route;
 
-Route::group(['prefix'=>'user/itinerary','middleware' => ['auth','verified']],function(){
+Route::group(['prefix'=>'admin/itinerary','middleware' => ['auth','verified']],function(){
     Route::get('/','ItineraryController@index')->name('itinerary.vendor.index');
     Route::get('/create','ItineraryController@create')->name('itinerary.vendor.create');
     Route::get('/edit/{id}','ItineraryController@edit')->name('itinerary.vendor.edit');

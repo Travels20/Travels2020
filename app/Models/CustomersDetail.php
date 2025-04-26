@@ -5,24 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CustomerDetails extends Model
+class CustomersDetails extends Model
 {
     use HasFactory;
 
-    protected $table = 'customers_details';
+    protected $table = 'customers_details'; 
 
-    protected $primaryKey = 'id';
+    // CustomerDetails.php
+protected $fillable = [
+    'travel_from', 'travel_to', 'destination', 'relationship', 'adults', 'children'
+];
+   
 
-    public $incrementing = true;
-
-    protected $fillable = [
-        'travel_from',
-        'travel_to',
-        'destination',
-        'relationship',
-        'adults',
-        'children'
-    ];
-
-    public $timestamps = true;
+    public function passengers()
+    {
+        return $this->hasMany(PassengerDetails::class, 'custome_id', 'id');
+    }
+    
 }

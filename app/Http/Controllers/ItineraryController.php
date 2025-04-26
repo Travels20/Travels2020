@@ -293,7 +293,7 @@ public function itineraryform()
 
         $boxCount = substr_count($html, 'class="box"');
         $boxHeightMm = 90; // Adjust this based on design
-        $nonBoxContentHeight = 2300; // Header + title + images + other sections
+        $nonBoxContentHeight = 1500; // Header + title + images + other sections
 
         $estimatedHeight = ($boxCount * $boxHeightMm) + $nonBoxContentHeight;
         $maxHeight = 20000;
@@ -552,7 +552,8 @@ public function update(Request $request, $id)
 
         return response()->json([
             'success' => true,
-            'message' => 'Trip updated successfully.'
+            'message' => 'Trip updated successfully.' ,
+            'id' => $id
         ]);
     } catch (\Exception $e) {
         return response()->json([

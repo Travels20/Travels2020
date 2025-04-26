@@ -1,5 +1,19 @@
+
+function toggleDestinationInput() {
+    let destinationSelect = document.getElementById("destinationSelect");
+    let tourNameInput = document.getElementById("destinationinput");
+
+    if (destinationSelect.value === "Others") {
+        tourNameInput.classList.remove("d-none"); // Show input field
+    } else {
+        tourNameInput.classList.add("d-none"); // Hide input field
+        tourNameInput.value = ""; // Clear input field
+    }
+}
+
 $(document).ready(function () {
 
+    
     document.addEventListener("DOMContentLoaded", function () {
         function toggleRelationshipInput() {
             console.log("toggleRelationshipInput function triggered.");
@@ -133,259 +147,239 @@ $(document).ready(function () {
 
     $('#numAdults, #numChildren').on('input', updatePassengerAccordion);
 
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    
+    // $("#confirmSubmit").click(function (event) {
+    //     event.preventDefault();
+    
+    //     const form = $("#customerForm")[0];
+    //     const formData = new FormData(form);
+    //     const passengers = $(".passenger-details");
+    
+    //     passengers.each(function (index) {
+    //         $(this).find("input, select").each(function () {
+    //             const fieldName = $(this).attr("name");
+    //             if (!fieldName) return;
+    
+    //             const cleanName = fieldName.replace(/\[\]$/, "");
+    //             const inputType = $(this).attr("type");
+    
+    //             if (inputType === "radio") {
+    //                 if ($(this).is(":checked")) {
+    //                     formData.append(`passengers[${index}][${cleanName}]`, $(this).val());
+    //                 }
+    //             } else if (inputType === "file") {
+    //                 const files = this.files;
+    //                 if (files.length > 0) {
+    //                     formData.append(`passengers[${index}][${cleanName}]`, files[0]);
+    //                 }
+    //             } else {
+    //                 formData.append(`passengers[${index}][${cleanName}]`, $(this).val().trim());
+    //             }
+    //         });
+    //     });
+    
+    //     // Explicitly set customer-level fields if needed
+    //     const customerFields = ['travel_from', 'travel_to', 'destination', 'relationship', 'adults', 'children'];
+    //     customerFields.forEach(field => {
+    //         const value = $(`[name="${field}"]`).val();
+    //         if (value !== undefined && value !== null) {
+    //             formData.set(field, value.trim());
+    //         }
+    //     });
+    
+    //     const button = $("#confirmSubmit");
+    //     button.prop("disabled", true).text("Saving...");
+    
+    //     fetch("/customers/store", {
+    //         method: "POST",
+    //         headers: {
+    //             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
+    //         },
+    //         body: formData
+    //     })
+    //     .then(response => response.json())
+    //     .then(response => {
+    //         console.log("Server Response:", response);
+    //         if (response.success) {
+    //             alert("Form submitted successfully!");
+    //             $("#customerForm")[0].reset();
+    //         } else {
+    //             alert(response.message || "Something went wrong.");
+    //         }
+    //     })
+    //     .catch(error => {
+    //         console.error("Error:", error);
+    //         alert("An error occurred while submitting.");
+    //     })
+    //     .finally(() => {
+    //         button.prop("disabled", false).text("Save");
+    //     });
+    // });
+    
 
-    $("#confirmSubmit").click(function (event) {
-        event.preventDefault();
-        let isValid = true; // Track validation status
+  
+  // SUBMIT BUTTON HANDLER
+  $("#submitButton, #confirmSubmit").click(function (event) {
+      event.preventDefault();
+      let isValid = true;
+  
+      $(".error-message").remove();
+      $(".is-invalid").removeClass("is-invalid");
+  
+      $("#customerForm .required").each(function () {
+          if ($(this).val().trim() === "") {
+              isValid = false;
+              $(this).addClass("is-invalid");
+              $(this).after('<small class="error-message text-danger">This field is required.</small>');
+          }
+      });
+  
+      if (!isValid) return;
+  
+      let form = $("#customerForm")[0];
+      let formData = new FormData(form);
+      let passengers = $(".passenger-details");
+  
+      passengers.each(function (index) {
+          $(this).find("input, select").each(function () {
+              let fieldName = $(this).attr("name");
+              if (!fieldName) return;
+  
+              let cleanName = fieldName.replace(/\[\]$/, "");
+              let type = $(this).attr("type");
+  
+              let key = `passengers[${index}][${cleanName}]`;
+  
+              if (type === "radio") {
+                  if ($(this).is(":checked")) {
+                      formData.append(key, $(this).val());
+                  }
+              } else if (type === "file") {
+                  if (this.files.length > 0) {
+                      formData.append(key, this.files[0]);
+                  }
+              } else {
+                  formData.append(key, $(this).val().trim());
+              }
+          });
+      });
+  
+      $.ajax({
+          url: "/customers/store",
+          type: "POST",
+          data: formData,
+          contentType: false,
+          processData: false,
+          dataType: "json",
+          beforeSend: function () {
+              $("#submitButton, #confirmSubmit").prop("disabled", true).text("Saving...");
+          },
+          success: function (response) {
+              console.log("Server Response:", response);
+              if (response.success) {
+                  alert("Form submitted successfully!");
+                  $("#customerForm")[0].reset();
+              } else {
+                  alert("Error: " + response.message);
+              }
+          },
+          error: function (xhr, status, error) {
+              alert("Something went wrong while submitting. Please check console.");
+          },
+          complete: function () {
+              $("#submitButton, #confirmSubmit").prop("disabled", false).text("Save");
+          }
+      });
+  });
+  
 
-        // Clear previous error messages
-        $(".error-message").remove();
-        $(".is-invalid").removeClass("is-invalid");
+// REVIEW BUTTON HANDLER
+document.getElementById("reviewButton").addEventListener("click", function () {
+    let travelFrom = document.getElementById("travelFrom").value;
+    let travelTo = document.getElementById("travelTo").value;
+    let destination = document.getElementById("destinationSelect").value;
+    let destinationInput = document.getElementById("destinationinput").value;
+    if (destination === "Others") {
+        destination = destinationInput;
+    }
+    let relationship = document.getElementById("relationshipSelect").value;
+    let numAdults = document.getElementById("numAdults").value;
+    let numChildren = document.getElementById("numChildren").value;
 
-        // Validate required fields
-        $("#customerForm .required").each(function () {
-            if ($(this).val().trim() === "") {
-                isValid = false;
-                $(this).addClass("is-invalid");
-                $(this).after('<small class="error-message text-danger">This field is required.</small>');
-            }
-        });
+    if (!travelFrom || !travelTo || !destination || !relationship) {
+        alert("Please fill in all required fields before reviewing.");
+        return;
+    }
 
+    let reviewDetails = `
+        <table class="table">
+            <tbody>
+                <tr><td><strong>Travel Dates:</strong></td><td>${travelFrom} to ${travelTo}</td></tr>
+                <tr><td><strong>Destination:</strong></td><td>${destination}</td></tr>
+                <tr><td><strong>Travelling Type:</strong></td><td>${relationship}</td></tr>
+                <tr><td><strong>Travellers:</strong></td><td>Adults: ${numAdults}, Children: ${numChildren}</td></tr>
+            </tbody>
+        </table>
+    `;
 
+    let passengerDetails = "";
+    let passengers = document.querySelectorAll(".passenger-details");
 
-        let form = $("#customerForm")[0];
-        let formData = new FormData(form);
-        let passengers = $(".passenger-details");
+    passengers.forEach((passenger, index) => {
+        let firstName = passenger.querySelector("input[name='passengerFirstName']")?.value || "N/A";
+        let lastName = passenger.querySelector("input[name='passengerLastName']")?.value || "N/A";
+        let mobileNumber = passenger.querySelector("input[name='mobileNumber']")?.value || "N/A";
+        let email = passenger.querySelector("input[name='email']")?.value || "N/A";
+        let gender = passenger.querySelector("input[name='gender']:checked")?.value || "N/A";
+        let dob = passenger.querySelector("input[name='dob']")?.value || "N/A";
+        let anniversary = passenger.querySelector("input[name='anniversary']")?.value || "N/A";
+        let passportNumber = passenger.querySelector("input[name='passportNumber']")?.value || "N/A";
+        let panNumber = passenger.querySelector("input[name='panNumber']")?.value || "N/A";
+        let passportIssueCity = passenger.querySelector("input[name='passportIssueCity']")?.value || "N/A";
+        let passportIssueDate = passenger.querySelector("input[name='passportIssueDate']")?.value || "N/A";
+        let passportExpiryDate = passenger.querySelector("input[name='passportExpiryDate']")?.value || "N/A";
 
-        let passengerDataArray = [];
+        let passportFront = passenger.querySelector("input[name='passportFront']")?.files[0];
+        let passportBack = passenger.querySelector("input[name='passportBack']")?.files[0];
+        let panCard = passenger.querySelector("input[name='panCard']")?.files[0];
 
-        passengers.each(function () {
-            let passengerData = {};
+        let passportFrontURL = passportFront ? URL.createObjectURL(passportFront) : '';
+        let passportBackURL = passportBack ? URL.createObjectURL(passportBack) : '';
+        let panCardURL = panCard ? URL.createObjectURL(panCard) : '';
 
-            $(this).find("input, select").each(function () {
-                let fieldName = $(this).attr("name");
-                let fieldValue = $(this).val();
-
-                if (!fieldName) return; // Skip elements without a name
-                fieldName = fieldName.replace(/\[\]$/, ""); // Remove array brackets if any
-
-                // Check if the element is a radio button (for gender)
-                if ($(this).attr("type") === "radio") {
-                    if ($(this).is(":checked")) {
-                        passengerData[fieldName] = $(this).val(); // Save value of selected radio button
-                    }
-                } else if ($(this).attr("type") === "file") {
-                    if (this.files.length > 0) {
-                        passengerData[fieldName] = this.files[0].name; // Store file name in the object
-                        formData.append(`passengers[${fieldName}]`, this.files[0]); // Append actual file
-                    }
-                } else {
-                    passengerData[fieldName] = fieldValue ? fieldValue.trim() : "";
-                }
-            });
-
-            passengerDataArray.push(passengerData);
-        });
-
-        console.log("Passenger Data Being Sent:", passengerDataArray);
-
-        // Convert passenger array to JSON and append it
-        formData.append("passengers", JSON.stringify(passengerDataArray));
-
-        // Select file input elements safely
-        let passportFrontInput = $("#passportFront")[0];
-        let passportBackInput = $("#passportBack")[0];
-        let panCardInput = $("#panCard")[0];
-
-        // Ensure input fields exist before accessing .files[0]
-        let passportFront = passportFrontInput ? passportFrontInput.files[0] : null;
-        let passportBack = passportBackInput ? passportBackInput.files[0] : null;
-        let panCard = panCardInput ? panCardInput.files[0] : null;
-
-        // Append files only if they are selected
-        if (passportFront) formData.append("passportFront", passportFront);
-        if (passportBack) formData.append("passportBack", passportBack);
-        if (panCard) formData.append("panCard", panCard);
-
-
-        $.ajax({
-            url: "{{ route('customers.store') }}",  // This is the proper way in Blade templates
-            type: "POST",
-            data: formData,
-            contentType: false,
-            processData: false,
-            dataType: "json",
-            beforeSend: function () {
-                $("#submitButton").prop("disabled", true).text("Saving...");
-            },
-            success: function (response) {
-                console.log("Server Response:", response);
-                if (response.success) {
-                    alert("Form submitted successfully!");
-                    $("#customerForm")[0].reset(); // Reset form on success
-                } else {
-                    alert("Error: " + response.message);
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error("AJAX Error:", xhr.responseText); // You can also alert or log the error
-                alert("An error occurred, please try again.");
-            },
-            complete: function () {
-                $("#submitButton").prop("disabled", false).text("Save");
-            }
-        });
-        
+        passengerDetails += `
+            <table class="table">
+                <tbody>
+                    <tr><td><strong>Passenger ${index + 1}:</strong></td><td>${firstName} ${lastName}</td></tr>
+                    <tr><td><strong>Gender:</strong></td><td>${gender}</td></tr>
+                    <tr><td><strong>DOB:</strong></td><td>${dob}</td></tr>
+                    <tr><td><strong>Anniversary:</strong></td><td>${anniversary}</td></tr>
+                    <tr><td><strong>Mobile:</strong></td><td>${mobileNumber}</td></tr>
+                    <tr><td><strong>Email:</strong></td><td>${email}</td></tr>
+                    <tr><td><strong>Passport Number:</strong></td><td>${passportNumber}</td></tr>
+                    <tr><td><strong>PAN Number:</strong></td><td>${panNumber}</td></tr>
+                    <tr><td><strong>Passport Issue City:</strong></td><td>${passportIssueCity}</td></tr>
+                    <tr><td><strong>Passport Issue Date:</strong></td><td>${passportIssueDate}</td></tr>
+                    <tr><td><strong>Passport Expiry Date:</strong></td><td>${passportExpiryDate}</td></tr>
+                    <tr><td><strong>Passport Front:</strong></td><td>${passportFrontURL ? `<img src="${passportFrontURL}" style="width: 50px; height: 50px;">` : "N/A"}</td></tr>
+                    <tr><td><strong>Passport Back:</strong></td><td>${passportBackURL ? `<img src="${passportBackURL}" style="width: 50px; height: 50px;">` : "N/A"}</td></tr>
+                    <tr><td><strong>Pan Card:</strong></td><td>${panCardURL ? `<img src="${panCardURL}" style="width: 50px; height: 50px;">` : "N/A"}</td></tr>
+                </tbody>
+            </table>
+        `;
     });
 
+    document.getElementById("reviewDetails").innerHTML = reviewDetails + passengerDetails;
 
-    document.getElementById("reviewButton").addEventListener("click", function () {
-        let travelFrom = document.getElementById("travelFrom").value;
-        let travelTo = document.getElementById("travelTo").value;
-        let destination = document.getElementById("destinationSelect").value;
-        if (destination === "Others") {
-            destination = document.getElementById("destinationinput").value;
-        }
-        // let tourName = document.getElementById("tourName").value || destination;
-        let relationship = document.getElementById("relationshipSelect").value;
-        let numAdults = document.getElementById("numAdults").value;
-        let numChildren = document.getElementById("numChildren").value;
+    let reviewModal = new bootstrap.Modal(document.getElementById("reviewModal"));
+    reviewModal.show();
+});
 
-        if (!travelFrom || !travelTo || !destination || !relationship) {
-            alert("Please fill in all required fields before reviewing.");
-            return;
-        }
-
-        let reviewDetails = `
-    <table class="table">
-        <tbody>
-            <tr>
-                <td><strong>Travel Dates:</strong></td>
-                <td>${travelFrom} to ${travelTo}</td>
-            </tr>
-            <tr>
-                <td><strong>Destination:</strong></td>
-                <td>${destination}</td>
-            </tr>
-            <tr>
-                <td><strong>Travelling Type:</strong></td>
-                <td>${relationship}</td>
-            </tr>
-            <tr>
-                <td><strong>Travellers:</strong></td>
-                <td>Adults: ${numAdults}, Children: ${numChildren}</td>
-            </tr>
-        </tbody>
-    </table>
-`;
-
-
-        // Collect Passenger Details
-        let passengerDetails = "";
-        let passengers = document.querySelectorAll(".passenger-details");
-
-        if (passengers.length === 0) {
-            console.warn("No passenger details found.");
-        }
-
-        passengers.forEach((passenger, index) => {
-            // Get passenger input values
-            let firstName = passenger.querySelector("input[name='passengerFirstName']").value || "N/A";
-            let lastName = passenger.querySelector("input[name='passengerLastName']").value || "N/A";
-            let mobileNumber = passenger.querySelector("input[name='mobileNumber']").value || "N/A";
-            let email = passenger.querySelector("input[name='email']").value || "N/A";
-            let gender = passenger.querySelector("input[name='gender']:checked")?.value || "N/A";
-            let dob = passenger.querySelector("input[name='dob']").value || "N/A";
-            let anniversary = passenger.querySelector("input[name='anniversary']").value || "N/A";
-            let passportNumber = passenger.querySelector("input[name='passportNumber']").value || "N/A";
-            let panNumber = passenger.querySelector("input[name='panNumber']").value || "N/A";
-            let passportIssueCity = passenger.querySelector("input[name='passportIssueCity']").value || "N/A";
-            // let passportIssueCountry = passenger.querySelector("input[name='passportIssueCountry']").value || "N/A";
-            let passportIssueDate = passenger.querySelector("input[name='passportIssueDate']").value || "N/A";
-            let passportExpiryDate = passenger.querySelector("input[name='passportExpiryDate']").value || "N/A";
-
-            // Get image files (if any)
-            let passportFront = passenger.querySelector("input[name='passportFront']").files[0];
-            let passportBack = passenger.querySelector("input[name='passportBack']").files[0];
-            let panCard = passenger.querySelector("input[name='panCard']").files[0];
-
-            // Generate object URLs for the images if the files are present
-            let passportFrontURL = passportFront ? URL.createObjectURL(passportFront) : '';
-            let passportBackURL = passportBack ? URL.createObjectURL(passportBack) : '';
-            let panCardURL = panCard ? URL.createObjectURL(panCard) : '';
-
-            // Add passenger details to the list
-            passengerDetails += `
-               <table class="table">
-        <tbody>
-            <tr>
-                <td><strong>Passenger ${index + 1}:</strong></td>
-                <td>${firstName} ${lastName}</td>
-            </tr>
-            <tr>
-                <td><strong>Gender:</strong></td>
-                <td>${gender}</td>
-            </tr>
-            <tr>
-                <td><strong>DOB:</strong></td>
-                <td>${dob}</td>
-            </tr>
-            <tr>
-                <td><strong>Anniversary:</strong></td>
-                <td>${anniversary}</td>
-            </tr>
-            <tr>
-                <td><strong>Mobile:</strong></td>
-                <td>${mobileNumber}</td>
-            </tr>
-            <tr>
-                <td><strong>Email:</strong></td>
-                <td>${email}</td>
-            </tr>
-            <tr>
-                <td><strong>Passport Number:</strong></td>
-                <td>${passportNumber}</td>
-            </tr>
-            <tr>
-                <td><strong>PAN Number:</strong></td>
-                <td>${panNumber}</td>
-            </tr>
-            <tr>
-                <td><strong>Passport Issue City:</strong></td>
-                <td>${passportIssueCity}</td>
-            </tr>
-            <tr>
-                <td><strong>Passport IssueDate :</strong></td>
-                <td>${passportIssueDate}</td>
-            </tr>
-            <tr>
-                <td><strong>Passport ExpiryDate:</strong></td>
-                <td>${passportExpiryDate}</td>
-            </tr>
-            <tr>
-                <td><strong>Passport Front:</strong></td>
-                <td>${passportFront ? `<img src="${passportFrontURL}" alt="Passport Front" style="width: 50px; height: 50px;" />` : "N/A"}</td>
-            </tr>
-            <tr>
-                <td><strong>Passport Back:</strong></td>
-                <td>${passportBack ? `<img src="${passportBackURL}" alt="Passport Back" style="width: 50px; height: 50px;" />` : "N/A"}</td>
-            </tr>
-            <tr>
-                <td><strong>Pan Card:</strong></td>
-                <td>${panCard ? `<img src="${panCardURL}" alt="Pan Card" style="width: 50px; height: 50px;" />` : "N/A"}</td>
-            </tr>
-        </tbody>
-    </table>
-            `;
-        });
-
-        // Display the review details
-        document.getElementById("reviewDetails").innerHTML = reviewDetails + passengerDetails;
-
-        // Show the modal
-        let reviewModal = new bootstrap.Modal(document.getElementById("reviewModal"));
-        reviewModal.show();
-    });
 
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -393,13 +387,13 @@ $(document).ready(function () {
     // alert(myParam
     if (myParam) {
         editcustomer(myParam);
-        $('#submitButton').hide();
+        $('#confirmSubmit').hide();
         $('#reviewButton').hide();
         // $('#imagehide').show();
         // $('#imagehideflight').show();
 
     } else {
-        $('#submitButton').show();
+        $('#confirmSubmit').show();
         $('#updateButton').hide();
         // $('#imagehide').hide();
         // $('#imagehideflight').hide();

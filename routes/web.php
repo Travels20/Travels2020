@@ -67,11 +67,12 @@ Route::get('/api/itineraryform/{id}', [ItineraryController::class, 'fetch']);
 
 //customers
 Route::get('/customers/customerform', [CustomerController::class, 'customerform'])->name('customers.customerform');
-Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+Route::get('/listcustomers', [InvoiceController::class, 'listCustomers']);
+Route::post('/customers/store', [CustomerController::class, 'store'])->name('customers.store');
+
 
 //invoices
 Route::post('/invoices/store', [InvoiceController::class, 'store'])->name('invoices.store');
-// Route::get('invoices/list', [InvoiceController::class, 'getInvoices'])->name('invoices.list');
 Route::get('/invoicepdf/{id}', [InvoiceController::class, 'generatePDF'])->name('invoice.invoicepdf');
 Route::get('/invoices/invoiceForm', [InvoiceController::class, 'invoiceForm'])->name('invoice.invoiceForm');
 Route::get('/listinvoices', [InvoiceController::class, 'listInvoices']);

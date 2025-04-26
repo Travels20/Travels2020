@@ -30,6 +30,7 @@
     <script src="{{ asset('js/itinerary.js') }}"></script>
     <script src="{{ asset('js/listinvoice.js') }}"></script>
     <script src="{{ asset('js/listitinerary.js') }}"></script>
+    <script src="{{ asset('js/customer.js') }}"></script>
 
 </body>
 

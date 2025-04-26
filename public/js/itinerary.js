@@ -1,6 +1,7 @@
 
 
 $(document).ready(function () {
+
     // Event listener for check-in and check-out date changes
     const checkInInput = document.getElementById("checkIn");
     const checkOutInput = document.getElementById("checkOut");
@@ -69,6 +70,7 @@ $(document).ready(function () {
                     <div class="col-12 col-md-6 mb-3">
                         <div class="form-floating">
                             <textarea class="form-control itinerary-editor" name="itinerary-content[]" placeholder="Enter itinerary details" style="height: 100px"></textarea>
+                            <small class="text-muted d-block mt-1">Maximum 600 characters or 7 lines.</small>
                         </div>
                     </div>
                 </div>
@@ -233,7 +235,7 @@ $(document).ready(function () {
                 // Then redirect after a short delay
                 setTimeout(() => {
                     window.location.href = "/adminItinerary";
-                }, 6000); 
+                }, 9000); 
             } else {
                 alert("Error processing request.");
             }
@@ -282,166 +284,91 @@ $(document).ready(function () {
     }
 
 
-function editTour(tripId) {
-    fetch(`/api/itineraryform/${tripId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const trip = data.trip;
+    function editTour(tripId) {
+        fetch(`/api/itineraryform/${tripId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const trip = data.trip;
 
-                $('#id').val(trip.id);
-                $('#tripId').val(trip.trip_id);
-                $('#userName').val(trip.username);
-                $('#tourName').val(trip.tour_name);
-                $('#checkIn').val(trip.check_in);
-                $('#checkOut').val(trip.check_out);
-                $('#numAdults').val(trip.adults);
-                $('#numChildren').val(trip.children);
-                $('#officerName').val(trip.officerName);
-                
-                // CKEditor fields
-                
-                // inclusionvalue.setData(trip.inclusion);
-                // exclusionvalue.setData(trip.exclusion);
-                // notevalue.setData();
-                // costvalue.setData();
-                // hotelvalue.setData();
-                // flightvalue.setData();
+                    $('#id').val(trip.id);
+                    $('#tripId').val(trip.trip_id);
+                    $('#userName').val(trip.username);
+                    $('#tourName').val(trip.tour_name);
+                    $('#checkIn').val(trip.check_in);
+                    $('#checkOut').val(trip.check_out);
+                    $('#numAdults').val(trip.adults);
+                    $('#numChildren').val(trip.children);
+                    $('#officerName').val(trip.officerName);
+                    
+                    // CKEditor fields
+                    
+                    // inclusionvalue.setData(trip.inclusion);
+                    // exclusionvalue.setData(trip.exclusion);
+                    // notevalue.setData();
+                    // costvalue.setData();
+                    // hotelvalue.setData();
+                    // flightvalue.setData();
 
-                // Use CKEditor instances to set content if present
-                if (typeof inclusionvalue !== 'undefined') inclusionvalue.setData(trip.inclusion);
-                if (typeof exclusionvalue !== 'undefined') exclusionvalue.setData(trip.exclusion);
-                if (typeof notevalue !== 'undefined') notevalue.setData(trip.notes);
-                if (typeof costvalue !== 'undefined') costvalue.setData(trip.cost);
-                if (typeof hotelvalue !== 'undefined') hotelvalue.setData(trip.hotel);
-                if (typeof flightvalue !== 'undefined') flightvalue.setData(trip.flight);
+                    // Use CKEditor instances to set content if present
+                    if (typeof inclusionvalue !== 'undefined') inclusionvalue.setData(trip.inclusion);
+                    if (typeof exclusionvalue !== 'undefined') exclusionvalue.setData(trip.exclusion);
+                    if (typeof notevalue !== 'undefined') notevalue.setData(trip.notes);
+                    if (typeof costvalue !== 'undefined') costvalue.setData(trip.cost);
+                    if (typeof hotelvalue !== 'undefined') hotelvalue.setData(trip.hotel);
+                    if (typeof flightvalue !== 'undefined') flightvalue.setData(trip.flight);
 
-                // Image preview
-                if (trip.tour_image) {
-                    $('#tourImagePreview').attr('src', trip.tour_image);
+                    // Image preview
+                    if (trip.tour_image) {
+                        $('#tourImagePreview').attr('src', trip.tour_image);
+                    }
+                    if (trip.ftimage) {
+                        $('#tourImagePreviewflight').attr('src', trip.ftimage);
+                    }
+                    if (trip.officerimage) {
+                        $('#tourImagePreviewofficer').attr('src', trip.officerimage);
+                    }
+
+                    // Vacation summary
+                    let daysContainer = $('#daysContainer');
+                    daysContainer.empty();
+
+                    if (data.vacation_summary && data.vacation_summary.length > 0) {
+                        data.vacation_summary.forEach((summary, index) => {
+                            addDay(summary.stay, summary.date, summary.image, summary.itinerary_content, index + 1);
+                        });
+                    }
+                } else {
+                    alert("Error fetching trip details: " + data.message);
                 }
-                if (trip.ftimage) {
-                    $('#tourImagePreviewflight').attr('src', trip.ftimage);
-                }
-                if (trip.officerimage) {
-                    $('#tourImagePreviewofficer').attr('src', trip.officerimage);
-                }
+            })
+            .catch(error => {
+                console.error("Error fetching trip details:", error);
+            });
+    }
 
-                // Vacation summary
-                let daysContainer = $('#daysContainer');
-                daysContainer.empty();
-
-                if (data.vacation_summary && data.vacation_summary.length > 0) {
-                    data.vacation_summary.forEach((summary, index) => {
-                        addDay(summary.stay, summary.date, summary.image, summary.itinerary_content, index + 1);
-                    });
-                }
-            } else {
-                alert("Error fetching trip details: " + data.message);
-            }
-        })
-        .catch(error => {
-            console.error("Error fetching trip details:", error);
-        });
-}
-
-
-// function editTour(tripId) {
-//      // Show the form
-//      document.getElementById("tourForm");
-
-//     fetch(`/itineraryform/${tripId}`)
-//         .then(response => {
-//             if (!response.ok) {
-//                 throw new Error(`HTTP error! status: ${response.status}`);
-//             }
-//             return response.json();
-//         })
-//         .then(data => {
-//             if (data.success) {
-//                 const trip = data.trip;
-//                 // const vacationSummary = data.vacation_summary;
-//                 // const daysContainer = document.getElementById("daysContainer");
-//                 let daysContainer = document.getElementById("daysContainer");
-
-//                 // Clear previous content
-//                 daysContainer.innerHTML = "";
-//                 window.location.href = `/itinerary/itineraryform`;
-
-//                 // Populate general tour details
-//                 document.getElementById("id").value = trip.id;
-//                 document.getElementById("tripId").value = trip.trip_id;
-//                 document.getElementById("userName").value = trip.username;
-//                 document.getElementById("tourName").value = trip.tour_name;
-//                 document.getElementById("checkIn").value = trip.check_in;
-//                 document.getElementById("checkOut").value = trip.check_out;
-//                 document.getElementById("numAdults").value = trip.adults;
-//                 document.getElementById("numChildren").value = trip.children;
-
-//                 // Set CKEditor contents
-//                 inclusionvalue.setData(trip.inclusion || '');
-//                 exclusionvalue.setData(trip.exclusion || '');
-//                 notevalue.setData(trip.notes || '');
-//                 costvalue.setData(trip.cost || '');
-//                 hotelvalue.setData(trip.hotel || '');
-//                 flightvalue.setData(trip.flight || '');
-
-//                 if (trip.map_image) {
-//                     document.getElementById("tourImagePreview").src = trip.map_image;
-//                     document.getElementById("tourImagePreview");
-//                 }
-//                 if (trip.flightimage) {
-//                     document.getElementById("tourImagePreviewflight").src = trip.flightimage;
-//                     document.getElementById("tourImagePreviewflight");
-//                 }
-//                 if (trip.officerimage) {
-//                     document.getElementById("tourImagePreviewofficer").src = trip.officerimage;
-//                     document.getElementById("tourImagePreviewofficer");
-//                 }
-
-//                 if (data && data.vacation_summary && data.vacation_summary.length > 0) {
-//                     var vsummary = data.vacation_summary;
-
-//                     for (let i = 0; i < vsummary.length; i++) {
-//                         addDay(vsummary[i].stay, vsummary[i].date, vsummary[i].image, vsummary[i].itinerary_content, i + 1);
-//                     }
-//                 }
-//             } else {
-//                 alert("Error fetching trip data: " + (data.message || "Unknown error."));
-//             }
-//         })
-//         .catch(error => {
-//             console.error("Error fetching trip details:", error);
-//             alert("Failed to load trip details.");
-//         });
-// }
-
-
-
-// Update Trip Function
-
-
-
+// Update Button Click
 $("#updateButton").on("click", function () {
     let daysContainer = document.getElementById("daysContainer");
     let dayForms = daysContainer.getElementsByClassName("update-day-form");
     let errorMessages = [];
     let formData = new FormData();
 
-   
     let pdfType = document.querySelector("input[name='pdfType']:checked").value;
 
     for (let i = 0; i < dayForms.length; i++) {
         let dayForm = dayForms[i];
         let stay = dayForm.querySelector("input[name='stay[]']").value.trim();
         let date = dayForm.querySelector("input[name='date[]']").value.trim();
-         let itineraryTextarea = dayForm.querySelector("textarea[name='itinerary[]']");
-         let itineraryId = itineraryTextarea.id;
-     
-         // Use CKEditor content if available, fallback to textarea value
-         let itinerary = (typeof CKEDITOR !== "undefined" && CKEDITOR.instances[itineraryId])
-             ? CKEDITOR.instances[itineraryId].getData().trim()
-             : itineraryTextarea.value.trim();
+        let itineraryTextarea = dayForm.querySelector("textarea[name='itinerary[]']");
+        let itineraryId = itineraryTextarea.id;
+
+        let itinerary = '';
+        if (editors[itineraryId]) {
+            itinerary = editors[itineraryId].getData().trim();
+        } else {
+            itinerary = itineraryTextarea.value.trim();
+        }
 
         let vsImageInput = dayForm.querySelector("input[name='images[]']");
         let vsImages = vsImageInput.files.length > 0 ? vsImageInput.files[0] : null;
@@ -471,9 +398,9 @@ $("#updateButton").on("click", function () {
     let exclusion = exclusionvalue.getData();
     let notes = notevalue.getData();
     let cost = costvalue.getData();
-
     let hotel = hotelvalue.getData();
     let flight = flightvalue.getData();
+
     let tourImages = document.getElementById("timages").files[0] || null;
     let flightImages = document.getElementById("flightimage").files[0] || null;
     let officerImage = document.getElementById("officerimage").files[0] || null;
@@ -487,12 +414,11 @@ $("#updateButton").on("click", function () {
     }
 
     if (errorMessages.length > 0) {
-        button.innerHTML = `Save`;
         alert(errorMessages.join("\n"));
         return;
     }
 
-    // Append general form data
+    // Append General Form Data
     formData.append("tripId", tripId);
     formData.append("userName", userName);
     formData.append("tourName", tourName);
@@ -517,19 +443,15 @@ $("#updateButton").on("click", function () {
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
-            const downloadUrl = pdfType === 'Single Pdf'
-                ? `/singlepdf-itinerary/${id}`
-                : `/multiplepdf-itinerary/${id}`;
+        if (data.success && data.id) {
+            const tourId = data.id;
+            const redirectUrl = pdfType === "Single Pdf"
+                ? `/singlepdf-itinerary/${tourId}`
+                : `/multiplepdf-itinerary/${tourId}`;
 
-            // Trigger the download
-            window.location.href = downloadUrl;
-
-            // setTimeout(() => {
-            //     window.location.href = "/adminitinerary";
-            // }, 1000);
+            window.location.href = redirectUrl;
         } else {
-            alert("Error updating itinerary: " + data.message);
+            alert("Error processing request: " + (data.message || "Unknown error"));
         }
     })
     .catch(error => {
@@ -538,17 +460,16 @@ $("#updateButton").on("click", function () {
     });
 });
 
-// Add Day Function - 
+// Add Day Function - Corrected
 function addDay(stay, date, image, itinerary, dayCount) {
     let newDay = document.createElement("div");
     newDay.classList.add("day-container", "update-day-form");
 
-    let uniqueId = `itinerary-${dayCount}`; // Generate a unique ID for each itinerary field
+    let uniqueId = `itinerary-${dayCount}`;
 
     newDay.innerHTML = `
         <h6 class="mb-3">Day ${dayCount}</h6>
         <div class="row">
-            <!-- Stay -->
             <div class="col-12 col-md-6 mb-3">
                 <div class="form-floating">
                     <input type="text" class="form-control" name="stay[]" placeholder="Enter Stay" value="${stay}" required>
@@ -556,7 +477,6 @@ function addDay(stay, date, image, itinerary, dayCount) {
                 </div>
             </div>
 
-            <!-- Date -->
             <div class="col-12 col-md-6 mb-3">
                 <div class="form-floating">
                     <input type="date" class="form-control" name="date[]" value="${date}" required>
@@ -564,14 +484,12 @@ function addDay(stay, date, image, itinerary, dayCount) {
                 </div>
             </div>
 
-            <!-- Image Upload -->
             <div class="col-12 col-md-6 mb-3">
                 <label class="form-label">Day ${dayCount} Image (Max: 300px width, 200px height)</label>
                 <input type="file" class="form-control image-upload" name="images[]" accept="image/*" required>
                 <img src="${image}" class="img-preview mt-2" style="width: 80px; height: 80px">
             </div>
 
-            <!-- Itinerary Content -->
             <div class="col-12 col-md-6 mb-3">
                 <div class="form-floating">
                     <textarea id="${uniqueId}" class="form-control itinerary-editor" name="itinerary[]" placeholder="Enter itinerary details" style="height: 100px" required>${itinerary}</textarea>
@@ -582,10 +500,14 @@ function addDay(stay, date, image, itinerary, dayCount) {
 
     document.getElementById("daysContainer").appendChild(newDay);
 
-    // Initialize CKEditor (using ClassicEditor)
+    // Initialize CKEditor5 and store it
     ClassicEditor.create(newDay.querySelector(`#${uniqueId}`))
+        .then(editor => {
+            editors[uniqueId] = editor;
+        })
         .catch(error => console.error("Error initializing CKEditor:", error));
 }
+
 });
 
 

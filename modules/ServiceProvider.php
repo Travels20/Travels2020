@@ -5,7 +5,7 @@ use Modules\Theme\ModuleProvider;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
-    protected static $coreModuleNames = ['Api','Social','Sms','Page','News','Admin','Booking','Order','Contact','Core','Dashboard','Email','Language','Layout','Media','Report','Review','Template','Theme','Tracking','Type','User','Vendor'];
+    protected static $coreModuleNames = ['Api','Social','Sms','Page','News','Admin','Booking','Order','Contact','Core','Dashboard', 'Itinerary','Email','Language','Layout','Media','Report','Review','Template','Theme','Tracking','Type','User','Vendor'];
 
     protected static $installedModules = [];
 

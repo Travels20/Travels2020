@@ -71,8 +71,8 @@
 <h1 style="text-align:center;">{{ strtoupper($row->tour_name) }}</h1>
 <p style="text-align:center;">({{ $nights }} Nights / {{ $duration }} Days)</p>
 
-@if ($row->map_image)
-    <img src="{{ $row->map_image }}" width="100%" style="margin-top: 10px;" />
+@if ($row->tour_image)
+    <img src="{{ $row->tour_image }}" width="100%" height="50%" style="margin-top: 10px;" />
 @endif
 
 <div class="box">
@@ -132,8 +132,8 @@
 @if (!empty($row->flight))
     <h2>Flight Details:</h2>
     {!! $row->flight !!}
-    @if (!empty($row->flightimage))
-        <img src="{{ $row->flightimage }}" width="100%" height="auto"><br><br>
+    @if (!empty($row->ftimage))
+        <img src="{{ $row->ftimage }}" width="100%" height="auto"><br><br>
     @endif
 @endif
 

@@ -13,73 +13,71 @@ function toggleDestination(selectElement) {
 
 $(document).ready(function () {
   // Submit form and generate invoice
-$('#InvoiceBtn').click(function (e) {
-    e.preventDefault();
+    $('#InvoiceBtn').click(function (e) {
+        e.preventDefault();
 
-    let isValid = true;
+        let isValid = true;
 
-    // Validate required fields
-    $('#invoiceForm [required]').each(function () {
-        if (!$(this).val()) {
-            isValid = false;
-            $(this).addClass('is-invalid');
-        } else {
-            $(this).removeClass('is-invalid');
-        }
-    });
+        // Validate required fields
+        $('#invoiceForm [required]').each(function () {
+            if (!$(this).val()) {
+                isValid = false;
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
 
-    if (!isValid) {
-        alert('Please fill all required fields.');
-        return;
-    }
-
-    let form = document.getElementById('invoiceForm');
-    let formData = new FormData(form);
-    let button = this;
-
-    // Disable button and show loading
-    $(button).prop('disabled', true).html("Saving...");
-
-    fetch("/invoices/store", {
-        method: "POST",
-        headers: {
-            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-        },
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        console.log("Server response:", data);
-
-        if (data && data.id) {
-            const invoiceId = data.id;
-            let redirectUrl = `/invoicepdf/${invoiceId}`;
-            window.open(redirectUrl, '_blank');
-        } else {
-            alert("Error processing request.");
+        if (!isValid) {
+            alert('Please fill all required fields.');
+            return;
         }
 
-        $(button).prop('disabled', false).html("Save");
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        alert("An error occurred while submitting.");
-        $(button).prop('disabled', false).html("Save");
+        let form = document.getElementById('invoiceForm');
+        let formData = new FormData(form);
+        let button = this;
+
+        // Disable button and show loading
+        $(button).prop('disabled', true).html("Saving...");
+
+        fetch("/invoices/store", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log("Server response:", data);
+
+            if (data && data.id) {
+                const invoiceId = data.id;
+                let redirectUrl = `/invoicepdf/${invoiceId}`;
+                window.open(redirectUrl, '_blank');
+            } else {
+                alert("Error processing request.");
+            }
+
+            $(button).prop('disabled', false).html("Save");
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("An error occurred while submitting.");
+            $(button).prop('disabled', false).html("Save");
+        });
     });
+
+
+ 
+
+
 });
-
-
 document.addEventListener("DOMContentLoaded", function () {
     const tableBody = document.getElementById("invoiceTableBody");
     const table = document.querySelector("#invoiceTable");
 
-    // ✅ Check if the table body exists
-    if (!tableBody || !table) {
-        console.error("Table or table body element not found in the DOM.");
-        return;
-    }
-
-    fetch("/listinvoices") // Make sure this route returns JSON properly
+    fetch("/listinvoices") 
         .then(response => {
             if (!response.ok) {
                 throw new Error("Failed to fetch itinerary data.");
@@ -87,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return response.json();
         })
         .then(invoices => {
-            tableBody.innerHTML = ""; // Clear previous content
+            tableBody.innerHTML = ""; 
 
             invoices.forEach((invoice, index) => {
                 const row = document.createElement("tr");
@@ -103,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <a href="/invoicepdf/${invoice.id}" target="_blank" title="View PDF">
                         <button class="btn btn-info btn-sm"><i class="fas fa-eye"></i></button>
                     </a>
-                   
+                
                 </td>
             `;
 
@@ -116,7 +114,4 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => {
             // console.error("Error fetching itinerary data:", error);
         });
-});
-
-
 });

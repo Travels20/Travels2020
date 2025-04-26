@@ -2,81 +2,79 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CustomerDetails;
+use App\Models\CustomersDetails;
 use App\Models\PassengerDetails;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log; 
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Validator;
 
 class CustomerController extends Controller
 {
     public function customerform()
     {
-        return view('customers.customerform'); 
+        return view('customers.customerform');
     }
 
     public function store(Request $request)
     {
-        // Validate the incoming data
         $validatedData = $request->validate([
-            'travel_from' => 'required|string|max:255',
-            'travel_to' => 'required|string|max:255',
+            'travelFrom' => 'required|string|max:255',
+            'travelTo' => 'required|string|max:255',
             'destination' => 'required|string|max:255',
-            'relationship' => 'nullable|string|max:255',  // Assuming relationship is optional
-            'adults' => 'required|integer|min:0',
-            'children' => 'required|integer|min:0',
-            // Validate passenger details if provided
-            'passengers' => 'nullable|array',
-            'passengers.*.first_name' => 'required|string|max:255',
-            'passengers.*.last_name' => 'required|string|max:255',
-            'passengers.*.mobile_number' => 'required|string|max:255',
-            'passengers.*.email' => 'required|email|max:255',
-            // Add other passenger fields here as needed
+            'relationship' => 'nullable|string|max:255',
+            'numAdults' => 'required|integer|min:0',
+            'numChildren' => 'nullable|integer|min:0',
         ]);
-
+    
         try {
-            // Create a new customer record in the database
+            // Save customer details
             $customer = CustomerDetails::create([
-                'travel_from' => $validatedData['travel_from'],
-                'travel_to' => $validatedData['travel_to'],
+                'travel_from' => $validatedData['travelFrom'],
+                'travel_to' => $validatedData['travelTo'],
                 'destination' => $validatedData['destination'],
                 'relationship' => $validatedData['relationship'] ?? null,
-                'adults' => $validatedData['adults'],
-                'children' => $validatedData['children'],
+                'adults' => $validatedData['numAdults'],
+                'children' => $validatedData['numChildren'] ?? 0,
             ]);
-
-            // If passengers data is provided, store the passenger details
-            if (isset($validatedData['passengers']) && count($validatedData['passengers']) > 0) {
-                foreach ($validatedData['passengers'] as $passengerData) {
-                    PassengerDetails::create([
-                        'customer_id' => $customer->id,
-                        'first_name' => $passengerData['first_name'],
-                        'last_name' => $passengerData['last_name'],
-                        'mobile_number' => $passengerData['mobile_number'],
-                        'email' => $passengerData['email'],
-                        'gender' => $passengerData['gender'] ?? null, // Assuming optional
-                        'dob' => $passengerData['dob'] ?? null, // Assuming optional
-                        'anniversary' => $passengerData['anniversary'] ?? null, // Assuming optional
-                        'pan_number' => $passengerData['pan_number'] ?? null, // Assuming optional
-                        'passport_number' => $passengerData['passport_number'] ?? null, // Assuming optional
-                        'passport_issue_city' => $passengerData['passport_issue_city'] ?? null, // Assuming optional
-                        'passport_issue_country' => $passengerData['passport_issue_country'] ?? null, // Assuming optional
-                        'passport_issue_date' => $passengerData['passport_issue_date'] ?? null, // Assuming optional
-                        'passport_expiry_date' => $passengerData['passport_expiry_date'] ?? null, // Assuming optional
-                        'passport_front' => $passengerData['passport_front'] ?? null, // Assuming optional
-                        'passport_back' => $passengerData['passport_back'] ?? null, // Assuming optional
-                        'pan_card' => $passengerData['pan_card'] ?? null, // Assuming optional
-                    ]);
-                }
+    
+            // Handle passenger details
+            $passengers = $request->input('passengers', []);
+            foreach ($passengers as $index => $passenger) {
+                $passportFront = $request->file("passengers.$index.passportFront");
+                $passportBack = $request->file("passengers.$index.passportBack");
+                $panCard = $request->file("passengers.$index.panCard");
+    
+                PassengerDetails::create([
+                    'customer_id' => $customer->id,
+                    'first_name' => $passenger['passengerFirstName'] ?? null,
+                    'last_name' => $passenger['passengerLastName'] ?? null,
+                    'mobile_number' => $passenger['mobileNumber'] ?? null,
+                    'email' => $passenger['email'] ?? null,
+                    'gender' => $passenger['gender'] ?? null,
+                    'dob' => $passenger['dob'] ?? null,
+                    'anniversary' => $passenger['anniversary'] ?? null,
+                    'pan_number' => $passenger['panNumber'] ?? null,
+                    'passport_number' => $passenger['passportNumber'] ?? null,
+                    'passport_issue_city' => $passenger['passportIssueCity'] ?? null,
+                    'passport_issue_country' => $passenger['passportIssueCountry'] ?? null,
+                    'passport_issue_date' => $passenger['passportIssueDate'] ?? null,
+                    'passport_expiry_date' => $passenger['passportExpiryDate'] ?? null,
+                    'passport_front' => $passportFront ? Cloudinary::upload($passportFront->getRealPath())->getSecurePath() : null,
+                    'passport_back' => $passportBack ? Cloudinary::upload($passportBack->getRealPath())->getSecurePath() : null,
+                    'pan_card' => $panCard ? Cloudinary::upload($panCard->getRealPath())->getSecurePath() : null,
+                ]);
             }
-
-            // Redirect with success
-            return redirect('/adminItinerary')->with('success', 'Itinerary saved successfully!');
-            
+    
+            return response()->json(['success' => true, 'message' => 'Form submitted successfully!']);
         } catch (\Exception $e) {
-            // Handle any errors during saving
             return response()->json([
                 'success' => false,
-                'message' => 'Error occurred while saving customer or passenger details: ' . $e->getMessage()
+                'message' => 'Something went wrong: ' . $e->getMessage()
             ], 500);
         }
     }
+    
+
 }

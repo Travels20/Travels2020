@@ -1,22 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.itineraryapp')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Travels2020 Customer Details</title>
-    <link rel="shortcut icon" href="../images/favicon.ico">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-</head>
-
-<body>
-    <div class="container mt-4">
+<div class="container mt-4">
         <!-- Tour Booking details -->
         <div class="card w-100 w-md-75 mx-auto">
             <div class="card-body">
                 <h5 class="card-title text-center">Customer Details</h5>
-                <form method="POST" action="{{ route('customers.store') }}" id="customerForm" enctype="multipart/form-data">
+                <form  id="customerForm" >
                      @csrf
                     <div class="row">
 
@@ -111,27 +100,3 @@
     </div>
 </div>
 
-    <script>
-    function toggleDestinationInput() {
-        let destinationSelect = document.getElementById("destinationSelect");
-        let tourNameInput = document.getElementById("destinationinput");
-
-        if (destinationSelect.value === "Others") {
-            tourNameInput.classList.remove("d-none"); // Show input field
-        } else {
-            tourNameInput.classList.add("d-none"); // Hide input field
-            tourNameInput.value = ""; // Clear input field
-        }
-    }
-
-
-</script>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- <script src="js/customer.js"></script> -->
-    <script src="{{ asset('js/customer.js') }}"></script>
-</body>
-
-</html>

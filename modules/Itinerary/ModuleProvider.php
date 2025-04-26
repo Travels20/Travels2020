@@ -43,15 +43,5 @@ class ModuleProvider extends ModuleServiceProvider
             ],
         ];
     }
-    public static function getUserMenu()
-    {
-        $res['itineary'] = [
-            'url'   => route('itineary.vendor.index'),
-            'title'      => __("itineary"),
-            'icon'       => "fa fa-ticket",
-            'position'   => 81,
-            'permission' => 'itineary_view',
-        ];
-        return $res;
-    }
+   
 }
